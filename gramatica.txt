@@ -1,0 +1,152 @@
+program : PROGRAM ID ';' declarations compound_statement '.'
+
+
+DECLARAÇÕES------------------------------------------
+
+declarations : declarations variable_declaration
+             | declarations procedure_declaration  
+             | declarations function_declaration
+             | empty
+
+variable_declaration : VAR variable_decl_list
+
+variable_decl_list : variable_decl_list variable_decl
+                   | variable_decl
+
+variable_decl : id_list ':' type ';'
+
+id_list : ID
+        | id_list ',' ID
+
+
+TIPOS-----------------------------------------------
+
+type : simple_type
+     | array_type
+
+simple_type : INTEGER
+            | REAL
+            | BOOLEAN
+            | CHAR
+            | STRING
+
+array_type : ARRAY '[' NUMBER RANGE NUMBER ']' OF type
+
+
+SUBPROGRAMAS----------------------------------------
+
+
+procedure_declaration : PROCEDURE ID ';' declarations compound_statement ';'
+                      | PROCEDURE ID '(' parameters ')' ';' declarations compound_statement ';'
+
+function_declaration : FUNCTION ID ':' type ';' declarations compound_statement ';'
+                     | FUNCTION ID '(' parameters ')' ':' type ';' declarations compound_statement ';'
+
+parameters : parameter_list
+
+parameter_list : parameter_list ';' parameter
+               | parameter
+
+parameter : id_list ':' type
+
+
+COMANDOS-------------------------------------------
+
+
+compound_statement : BEGIN statement_list END
+
+statement_list : statement_list ';' statement
+               | statement
+
+statement : assignment_statement
+          | procedure_call
+          | compound_statement
+          | if_statement
+          | while_statement
+          | for_statement
+          | read_statement
+          | write_statement
+          | empty
+
+assignment_statement : variable ASSIGN expression
+
+procedure_call : ID '(' expression_list ')'
+               | ID
+
+
+ESTRUTURAS_DE_CONTROLO-----------------------------
+
+if_statement : IF expression THEN statement
+             | IF expression THEN statement ELSE statement
+
+while_statement : WHILE expression DO statement
+
+for_statement : FOR ID ASSIGN expression TO expression DO statement
+              | FOR ID ASSIGN expression DOWNTO expression DO statement
+
+
+
+INPUT/OUTPUT----------------------------------------
+
+read_statement : READ '(' variable_list ')'
+               | READLN '(' variable_list ')'
+               | READLN
+
+write_statement : WRITE '(' expression_list ')'
+                | WRITELN '(' expression_list ')'
+                | WRITELN
+
+variable_list : variable_list ',' variable
+              | variable
+
+expression_list : expression_list ',' expression
+                | expression
+
+
+EXPRESSOES-----------------------------------------
+
+
+expression : simple_expression relational_op simple_expression
+           | simple_expression
+
+relational_op : EQUALS
+              | NOT_EQUALS
+              | LESS_THAN
+              | LESS_THAN_OR_EQUAL_TO
+              | GREATER_THAN
+              | GREATER_THAN_OR_EQUAL_TO
+
+simple_expression : simple_expression '+' term
+                  | simple_expression '-' term
+                  | simple_expression OR term
+                  | term
+                  | '+' term
+                  | '-' term
+
+term : term '*' factor
+     | term '/' factor
+     | term DIV factor
+     | term MOD factor
+     | term AND factor
+     | factor
+
+factor : NUMBER
+       | REAL_NUMBER
+       | STRING_LITERAL
+       | TRUE
+       | FALSE
+       | variable
+       | function_call
+       | '(' expression ')'
+       | NOT factor
+
+variable : ID
+         | ID '[' expression ']'
+
+function_call : ID '(' expression_list ')'
+              | LENGTH '(' expression ')'
+
+
+VAZIO----------------------------------------------
+
+empty:
