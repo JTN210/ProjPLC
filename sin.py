@@ -559,6 +559,20 @@ if __name__ == '__main__':
     result5 = parse_string(test5)
     
     print("\n" + "=" * 60)
+    print("TESTE 6:")
+    print("=" * 60)
+    test6 = """
+    program Hello;
+    var
+    i : interger;
+    begin
+        i := (((-((((-((+++++++++++++++++(+((-+-+((2))))))))))))));
+        write(i)
+    end.
+    """
+    result6 = parse_string(test6)
+    
+    print("\n" + "=" * 60)
     print("RESUMO DOS TESTES")
     print("=" * 60)
     print(f"Teste 1 (Hello World): {'✓ PASSOU' if result1 else '✗ FALHOU'}")
@@ -566,3 +580,4 @@ if __name__ == '__main__':
     print(f"Teste 3 (Número Primo): {'✓ PASSOU' if result3 else '✗ FALHOU'}")
     print(f"Teste 4 (Array): {'✓ PASSOU' if result4 else '✗ FALHOU'}")
     print(f"Teste 5 (Função): {'✓ PASSOU' if result5 else '✗ FALHOU'}")
+    print(f"Teste 6 (Função): {'✓ PASSOU' if result6 else '✗ FALHOU'}")
