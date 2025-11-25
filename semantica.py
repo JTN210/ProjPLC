@@ -91,7 +91,7 @@ class AnalisadorSemantico:
         elif isinstance(no, list):
             return [self.visitar(item) for item in no]
         else:
-            return no  # Literais (números, strings, booleanos)
+            return self._tipo_literal(no)
             
     def visita_generica(self, no):
         """Visita genérica para nós não implementados"""
@@ -498,6 +498,19 @@ class AnalisadorSemantico:
             return True
             
         return False
+
+    def _tipo_literal(self, valor):
+        """Retorna o tipo semântico de um literal"""
+        if isinstance(valor, bool):
+            return 'boolean'
+        if isinstance(valor, int):
+            return 'integer'
+        if isinstance(valor, float):
+            return 'real'
+        if isinstance(valor, str):
+            tipos_pascal = {'integer', 'real', 'boolean', 'string', 'char'}
+            return valor if valor in tipos_pascal else 'string'
+        return valor
 
 
 # FUNÇÃO PRINCIPAL PARA TESTAR
