@@ -504,7 +504,7 @@ class AnalisadorSemantico:
 
 def analisar_ficheiro(nome_ficheiro):
     """Analisa um arquivo Pascal semanticamente"""
-    from yacc import parse_file
+    from sin import parse_file
     
     print(f"\n{'='*60}")
     print(f"ANÁLISE SEMÂNTICA: {nome_ficheiro}")
@@ -534,8 +534,8 @@ def analisar_ficheiro(nome_ficheiro):
 
 def analisar_codigo(codigo):
     """Analisa código Pascal semanticamente"""
-    from yacc import parse_string
-    
+    from sin import parse_string
+
     ast = parse_string(codigo)
     
     if not ast:
