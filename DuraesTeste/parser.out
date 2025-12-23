@@ -1,0 +1,1323 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    DIV
+    MOD
+    NEQ
+
+Grammar
+
+Rule 0     S' -> program
+Rule 1     program -> PROGRAM ID SEMI decls block DOT
+Rule 2     decls -> VAR var_list
+Rule 3     decls -> empty
+Rule 4     var_list -> var_list var_item
+Rule 5     var_list -> var_item
+Rule 6     var_item -> ids COLON type SEMI
+Rule 7     ids -> ids COMMA ID
+Rule 8     ids -> ID
+Rule 9     type -> INTEGER
+Rule 10    block -> BEGIN statements END
+Rule 11    statements -> statements SEMI statement
+Rule 12    statements -> statement
+Rule 13    statement -> ID ASSIGN expression
+Rule 14    statement -> WRITELN LPAREN expression RPAREN
+Rule 15    statement -> WRITELN LPAREN STRING RPAREN
+Rule 16    statement -> READLN LPAREN ID RPAREN
+Rule 17    statement -> IF expression THEN block ELSE block
+Rule 18    statement -> IF expression THEN block
+Rule 19    statement -> WHILE expression DO block
+Rule 20    expression -> expression PLUS expression
+Rule 21    expression -> expression MINUS expression
+Rule 22    expression -> expression TIMES expression
+Rule 23    expression -> expression DIVIDE expression
+Rule 24    expression -> expression EQ expression
+Rule 25    expression -> expression LT expression
+Rule 26    expression -> expression GT expression
+Rule 27    expression -> expression LE expression
+Rule 28    expression -> expression GE expression
+Rule 29    expression -> LPAREN expression RPAREN
+Rule 30    expression -> NUM
+Rule 31    expression -> ID
+Rule 32    empty -> <empty>
+
+Terminals, with rules where they appear
+
+ASSIGN               : 13
+BEGIN                : 10
+COLON                : 6
+COMMA                : 7
+DIV                  : 
+DIVIDE               : 23
+DO                   : 19
+DOT                  : 1
+ELSE                 : 17
+END                  : 10
+EQ                   : 24
+GE                   : 28
+GT                   : 26
+ID                   : 1 7 8 13 16 31
+IF                   : 17 18
+INTEGER              : 9
+LE                   : 27
+LPAREN               : 14 15 16 29
+LT                   : 25
+MINUS                : 21
+MOD                  : 
+NEQ                  : 
+NUM                  : 30
+PLUS                 : 20
+PROGRAM              : 1
+READLN               : 16
+RPAREN               : 14 15 16 29
+SEMI                 : 1 6 11
+STRING               : 15
+THEN                 : 17 18
+TIMES                : 22
+VAR                  : 2
+WHILE                : 19
+WRITELN              : 14 15
+error                : 
+
+Nonterminals, with rules where they appear
+
+block                : 1 17 17 18 19
+decls                : 1
+empty                : 3
+expression           : 13 14 17 18 19 20 20 21 21 22 22 23 23 24 24 25 25 26 26 27 27 28 28 29
+ids                  : 6 7
+program              : 0
+statement            : 11 12
+statements           : 10 11
+type                 : 6
+var_item             : 4 5
+var_list             : 2 4
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . program
+    (1) program -> . PROGRAM ID SEMI decls block DOT
+
+    PROGRAM         shift and go to state 2
+
+    program                        shift and go to state 1
+
+state 1
+
+    (0) S' -> program .
+
+
+
+state 2
+
+    (1) program -> PROGRAM . ID SEMI decls block DOT
+
+    ID              shift and go to state 3
+
+
+state 3
+
+    (1) program -> PROGRAM ID . SEMI decls block DOT
+
+    SEMI            shift and go to state 4
+
+
+state 4
+
+    (1) program -> PROGRAM ID SEMI . decls block DOT
+    (2) decls -> . VAR var_list
+    (3) decls -> . empty
+    (32) empty -> .
+
+    VAR             shift and go to state 6
+    BEGIN           reduce using rule 32 (empty -> .)
+
+    decls                          shift and go to state 5
+    empty                          shift and go to state 7
+
+state 5
+
+    (1) program -> PROGRAM ID SEMI decls . block DOT
+    (10) block -> . BEGIN statements END
+
+    BEGIN           shift and go to state 9
+
+    block                          shift and go to state 8
+
+state 6
+
+    (2) decls -> VAR . var_list
+    (4) var_list -> . var_list var_item
+    (5) var_list -> . var_item
+    (6) var_item -> . ids COLON type SEMI
+    (7) ids -> . ids COMMA ID
+    (8) ids -> . ID
+
+    ID              shift and go to state 13
+
+    var_list                       shift and go to state 10
+    var_item                       shift and go to state 11
+    ids                            shift and go to state 12
+
+state 7
+
+    (3) decls -> empty .
+
+    BEGIN           reduce using rule 3 (decls -> empty .)
+
+
+state 8
+
+    (1) program -> PROGRAM ID SEMI decls block . DOT
+
+    DOT             shift and go to state 14
+
+
+state 9
+
+    (10) block -> BEGIN . statements END
+    (11) statements -> . statements SEMI statement
+    (12) statements -> . statement
+    (13) statement -> . ID ASSIGN expression
+    (14) statement -> . WRITELN LPAREN expression RPAREN
+    (15) statement -> . WRITELN LPAREN STRING RPAREN
+    (16) statement -> . READLN LPAREN ID RPAREN
+    (17) statement -> . IF expression THEN block ELSE block
+    (18) statement -> . IF expression THEN block
+    (19) statement -> . WHILE expression DO block
+
+    ID              shift and go to state 17
+    WRITELN         shift and go to state 18
+    READLN          shift and go to state 19
+    IF              shift and go to state 20
+    WHILE           shift and go to state 21
+
+    statements                     shift and go to state 15
+    statement                      shift and go to state 16
+
+state 10
+
+    (2) decls -> VAR var_list .
+    (4) var_list -> var_list . var_item
+    (6) var_item -> . ids COLON type SEMI
+    (7) ids -> . ids COMMA ID
+    (8) ids -> . ID
+
+    BEGIN           reduce using rule 2 (decls -> VAR var_list .)
+    ID              shift and go to state 13
+
+    var_item                       shift and go to state 22
+    ids                            shift and go to state 12
+
+state 11
+
+    (5) var_list -> var_item .
+
+    ID              reduce using rule 5 (var_list -> var_item .)
+    BEGIN           reduce using rule 5 (var_list -> var_item .)
+
+
+state 12
+
+    (6) var_item -> ids . COLON type SEMI
+    (7) ids -> ids . COMMA ID
+
+    COLON           shift and go to state 23
+    COMMA           shift and go to state 24
+
+
+state 13
+
+    (8) ids -> ID .
+
+    COLON           reduce using rule 8 (ids -> ID .)
+    COMMA           reduce using rule 8 (ids -> ID .)
+
+
+state 14
+
+    (1) program -> PROGRAM ID SEMI decls block DOT .
+
+    $end            reduce using rule 1 (program -> PROGRAM ID SEMI decls block DOT .)
+
+
+state 15
+
+    (10) block -> BEGIN statements . END
+    (11) statements -> statements . SEMI statement
+
+    END             shift and go to state 25
+    SEMI            shift and go to state 26
+
+
+state 16
+
+    (12) statements -> statement .
+
+    END             reduce using rule 12 (statements -> statement .)
+    SEMI            reduce using rule 12 (statements -> statement .)
+
+
+state 17
+
+    (13) statement -> ID . ASSIGN expression
+
+    ASSIGN          shift and go to state 27
+
+
+state 18
+
+    (14) statement -> WRITELN . LPAREN expression RPAREN
+    (15) statement -> WRITELN . LPAREN STRING RPAREN
+
+    LPAREN          shift and go to state 28
+
+
+state 19
+
+    (16) statement -> READLN . LPAREN ID RPAREN
+
+    LPAREN          shift and go to state 29
+
+
+state 20
+
+    (17) statement -> IF . expression THEN block ELSE block
+    (18) statement -> IF . expression THEN block
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 30
+
+state 21
+
+    (19) statement -> WHILE . expression DO block
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 34
+
+state 22
+
+    (4) var_list -> var_list var_item .
+
+    ID              reduce using rule 4 (var_list -> var_list var_item .)
+    BEGIN           reduce using rule 4 (var_list -> var_list var_item .)
+
+
+state 23
+
+    (6) var_item -> ids COLON . type SEMI
+    (9) type -> . INTEGER
+
+    INTEGER         shift and go to state 36
+
+    type                           shift and go to state 35
+
+state 24
+
+    (7) ids -> ids COMMA . ID
+
+    ID              shift and go to state 37
+
+
+state 25
+
+    (10) block -> BEGIN statements END .
+
+    DOT             reduce using rule 10 (block -> BEGIN statements END .)
+    ELSE            reduce using rule 10 (block -> BEGIN statements END .)
+    END             reduce using rule 10 (block -> BEGIN statements END .)
+    SEMI            reduce using rule 10 (block -> BEGIN statements END .)
+
+
+state 26
+
+    (11) statements -> statements SEMI . statement
+    (13) statement -> . ID ASSIGN expression
+    (14) statement -> . WRITELN LPAREN expression RPAREN
+    (15) statement -> . WRITELN LPAREN STRING RPAREN
+    (16) statement -> . READLN LPAREN ID RPAREN
+    (17) statement -> . IF expression THEN block ELSE block
+    (18) statement -> . IF expression THEN block
+    (19) statement -> . WHILE expression DO block
+
+    ID              shift and go to state 17
+    WRITELN         shift and go to state 18
+    READLN          shift and go to state 19
+    IF              shift and go to state 20
+    WHILE           shift and go to state 21
+
+    statement                      shift and go to state 38
+
+state 27
+
+    (13) statement -> ID ASSIGN . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 39
+
+state 28
+
+    (14) statement -> WRITELN LPAREN . expression RPAREN
+    (15) statement -> WRITELN LPAREN . STRING RPAREN
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    STRING          shift and go to state 41
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 40
+
+state 29
+
+    (16) statement -> READLN LPAREN . ID RPAREN
+
+    ID              shift and go to state 42
+
+
+state 30
+
+    (17) statement -> IF expression . THEN block ELSE block
+    (18) statement -> IF expression . THEN block
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            shift and go to state 43
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+    EQ              shift and go to state 48
+    LT              shift and go to state 49
+    GT              shift and go to state 50
+    LE              shift and go to state 51
+    GE              shift and go to state 52
+
+
+state 31
+
+    (29) expression -> LPAREN . expression RPAREN
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 53
+
+state 32
+
+    (30) expression -> NUM .
+
+    THEN            reduce using rule 30 (expression -> NUM .)
+    PLUS            reduce using rule 30 (expression -> NUM .)
+    MINUS           reduce using rule 30 (expression -> NUM .)
+    TIMES           reduce using rule 30 (expression -> NUM .)
+    DIVIDE          reduce using rule 30 (expression -> NUM .)
+    EQ              reduce using rule 30 (expression -> NUM .)
+    LT              reduce using rule 30 (expression -> NUM .)
+    GT              reduce using rule 30 (expression -> NUM .)
+    LE              reduce using rule 30 (expression -> NUM .)
+    GE              reduce using rule 30 (expression -> NUM .)
+    DO              reduce using rule 30 (expression -> NUM .)
+    END             reduce using rule 30 (expression -> NUM .)
+    SEMI            reduce using rule 30 (expression -> NUM .)
+    RPAREN          reduce using rule 30 (expression -> NUM .)
+
+
+state 33
+
+    (31) expression -> ID .
+
+    THEN            reduce using rule 31 (expression -> ID .)
+    PLUS            reduce using rule 31 (expression -> ID .)
+    MINUS           reduce using rule 31 (expression -> ID .)
+    TIMES           reduce using rule 31 (expression -> ID .)
+    DIVIDE          reduce using rule 31 (expression -> ID .)
+    EQ              reduce using rule 31 (expression -> ID .)
+    LT              reduce using rule 31 (expression -> ID .)
+    GT              reduce using rule 31 (expression -> ID .)
+    LE              reduce using rule 31 (expression -> ID .)
+    GE              reduce using rule 31 (expression -> ID .)
+    DO              reduce using rule 31 (expression -> ID .)
+    END             reduce using rule 31 (expression -> ID .)
+    SEMI            reduce using rule 31 (expression -> ID .)
+    RPAREN          reduce using rule 31 (expression -> ID .)
+
+
+state 34
+
+    (19) statement -> WHILE expression . DO block
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    DO              shift and go to state 54
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+    EQ              shift and go to state 48
+    LT              shift and go to state 49
+    GT              shift and go to state 50
+    LE              shift and go to state 51
+    GE              shift and go to state 52
+
+
+state 35
+
+    (6) var_item -> ids COLON type . SEMI
+
+    SEMI            shift and go to state 55
+
+
+state 36
+
+    (9) type -> INTEGER .
+
+    SEMI            reduce using rule 9 (type -> INTEGER .)
+
+
+state 37
+
+    (7) ids -> ids COMMA ID .
+
+    COLON           reduce using rule 7 (ids -> ids COMMA ID .)
+    COMMA           reduce using rule 7 (ids -> ids COMMA ID .)
+
+
+state 38
+
+    (11) statements -> statements SEMI statement .
+
+    END             reduce using rule 11 (statements -> statements SEMI statement .)
+    SEMI            reduce using rule 11 (statements -> statements SEMI statement .)
+
+
+state 39
+
+    (13) statement -> ID ASSIGN expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    END             reduce using rule 13 (statement -> ID ASSIGN expression .)
+    SEMI            reduce using rule 13 (statement -> ID ASSIGN expression .)
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+    EQ              shift and go to state 48
+    LT              shift and go to state 49
+    GT              shift and go to state 50
+    LE              shift and go to state 51
+    GE              shift and go to state 52
+
+
+state 40
+
+    (14) statement -> WRITELN LPAREN expression . RPAREN
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    RPAREN          shift and go to state 56
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+    EQ              shift and go to state 48
+    LT              shift and go to state 49
+    GT              shift and go to state 50
+    LE              shift and go to state 51
+    GE              shift and go to state 52
+
+
+state 41
+
+    (15) statement -> WRITELN LPAREN STRING . RPAREN
+
+    RPAREN          shift and go to state 57
+
+
+state 42
+
+    (16) statement -> READLN LPAREN ID . RPAREN
+
+    RPAREN          shift and go to state 58
+
+
+state 43
+
+    (17) statement -> IF expression THEN . block ELSE block
+    (18) statement -> IF expression THEN . block
+    (10) block -> . BEGIN statements END
+
+    BEGIN           shift and go to state 9
+
+    block                          shift and go to state 59
+
+state 44
+
+    (20) expression -> expression PLUS . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 60
+
+state 45
+
+    (21) expression -> expression MINUS . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 61
+
+state 46
+
+    (22) expression -> expression TIMES . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 62
+
+state 47
+
+    (23) expression -> expression DIVIDE . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 63
+
+state 48
+
+    (24) expression -> expression EQ . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 64
+
+state 49
+
+    (25) expression -> expression LT . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 65
+
+state 50
+
+    (26) expression -> expression GT . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 66
+
+state 51
+
+    (27) expression -> expression LE . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 67
+
+state 52
+
+    (28) expression -> expression GE . expression
+    (20) expression -> . expression PLUS expression
+    (21) expression -> . expression MINUS expression
+    (22) expression -> . expression TIMES expression
+    (23) expression -> . expression DIVIDE expression
+    (24) expression -> . expression EQ expression
+    (25) expression -> . expression LT expression
+    (26) expression -> . expression GT expression
+    (27) expression -> . expression LE expression
+    (28) expression -> . expression GE expression
+    (29) expression -> . LPAREN expression RPAREN
+    (30) expression -> . NUM
+    (31) expression -> . ID
+
+    LPAREN          shift and go to state 31
+    NUM             shift and go to state 32
+    ID              shift and go to state 33
+
+    expression                     shift and go to state 68
+
+state 53
+
+    (29) expression -> LPAREN expression . RPAREN
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    RPAREN          shift and go to state 69
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+    EQ              shift and go to state 48
+    LT              shift and go to state 49
+    GT              shift and go to state 50
+    LE              shift and go to state 51
+    GE              shift and go to state 52
+
+
+state 54
+
+    (19) statement -> WHILE expression DO . block
+    (10) block -> . BEGIN statements END
+
+    BEGIN           shift and go to state 9
+
+    block                          shift and go to state 70
+
+state 55
+
+    (6) var_item -> ids COLON type SEMI .
+
+    ID              reduce using rule 6 (var_item -> ids COLON type SEMI .)
+    BEGIN           reduce using rule 6 (var_item -> ids COLON type SEMI .)
+
+
+state 56
+
+    (14) statement -> WRITELN LPAREN expression RPAREN .
+
+    END             reduce using rule 14 (statement -> WRITELN LPAREN expression RPAREN .)
+    SEMI            reduce using rule 14 (statement -> WRITELN LPAREN expression RPAREN .)
+
+
+state 57
+
+    (15) statement -> WRITELN LPAREN STRING RPAREN .
+
+    END             reduce using rule 15 (statement -> WRITELN LPAREN STRING RPAREN .)
+    SEMI            reduce using rule 15 (statement -> WRITELN LPAREN STRING RPAREN .)
+
+
+state 58
+
+    (16) statement -> READLN LPAREN ID RPAREN .
+
+    END             reduce using rule 16 (statement -> READLN LPAREN ID RPAREN .)
+    SEMI            reduce using rule 16 (statement -> READLN LPAREN ID RPAREN .)
+
+
+state 59
+
+    (17) statement -> IF expression THEN block . ELSE block
+    (18) statement -> IF expression THEN block .
+
+    ELSE            shift and go to state 71
+    END             reduce using rule 18 (statement -> IF expression THEN block .)
+    SEMI            reduce using rule 18 (statement -> IF expression THEN block .)
+
+
+state 60
+
+    (20) expression -> expression PLUS expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            reduce using rule 20 (expression -> expression PLUS expression .)
+    PLUS            reduce using rule 20 (expression -> expression PLUS expression .)
+    MINUS           reduce using rule 20 (expression -> expression PLUS expression .)
+    EQ              reduce using rule 20 (expression -> expression PLUS expression .)
+    LT              reduce using rule 20 (expression -> expression PLUS expression .)
+    GT              reduce using rule 20 (expression -> expression PLUS expression .)
+    LE              reduce using rule 20 (expression -> expression PLUS expression .)
+    GE              reduce using rule 20 (expression -> expression PLUS expression .)
+    DO              reduce using rule 20 (expression -> expression PLUS expression .)
+    END             reduce using rule 20 (expression -> expression PLUS expression .)
+    SEMI            reduce using rule 20 (expression -> expression PLUS expression .)
+    RPAREN          reduce using rule 20 (expression -> expression PLUS expression .)
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+
+  ! TIMES           [ reduce using rule 20 (expression -> expression PLUS expression .) ]
+  ! DIVIDE          [ reduce using rule 20 (expression -> expression PLUS expression .) ]
+  ! PLUS            [ shift and go to state 44 ]
+  ! MINUS           [ shift and go to state 45 ]
+  ! EQ              [ shift and go to state 48 ]
+  ! LT              [ shift and go to state 49 ]
+  ! GT              [ shift and go to state 50 ]
+  ! LE              [ shift and go to state 51 ]
+  ! GE              [ shift and go to state 52 ]
+
+
+state 61
+
+    (21) expression -> expression MINUS expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            reduce using rule 21 (expression -> expression MINUS expression .)
+    PLUS            reduce using rule 21 (expression -> expression MINUS expression .)
+    MINUS           reduce using rule 21 (expression -> expression MINUS expression .)
+    EQ              reduce using rule 21 (expression -> expression MINUS expression .)
+    LT              reduce using rule 21 (expression -> expression MINUS expression .)
+    GT              reduce using rule 21 (expression -> expression MINUS expression .)
+    LE              reduce using rule 21 (expression -> expression MINUS expression .)
+    GE              reduce using rule 21 (expression -> expression MINUS expression .)
+    DO              reduce using rule 21 (expression -> expression MINUS expression .)
+    END             reduce using rule 21 (expression -> expression MINUS expression .)
+    SEMI            reduce using rule 21 (expression -> expression MINUS expression .)
+    RPAREN          reduce using rule 21 (expression -> expression MINUS expression .)
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+
+  ! TIMES           [ reduce using rule 21 (expression -> expression MINUS expression .) ]
+  ! DIVIDE          [ reduce using rule 21 (expression -> expression MINUS expression .) ]
+  ! PLUS            [ shift and go to state 44 ]
+  ! MINUS           [ shift and go to state 45 ]
+  ! EQ              [ shift and go to state 48 ]
+  ! LT              [ shift and go to state 49 ]
+  ! GT              [ shift and go to state 50 ]
+  ! LE              [ shift and go to state 51 ]
+  ! GE              [ shift and go to state 52 ]
+
+
+state 62
+
+    (22) expression -> expression TIMES expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            reduce using rule 22 (expression -> expression TIMES expression .)
+    PLUS            reduce using rule 22 (expression -> expression TIMES expression .)
+    MINUS           reduce using rule 22 (expression -> expression TIMES expression .)
+    TIMES           reduce using rule 22 (expression -> expression TIMES expression .)
+    DIVIDE          reduce using rule 22 (expression -> expression TIMES expression .)
+    EQ              reduce using rule 22 (expression -> expression TIMES expression .)
+    LT              reduce using rule 22 (expression -> expression TIMES expression .)
+    GT              reduce using rule 22 (expression -> expression TIMES expression .)
+    LE              reduce using rule 22 (expression -> expression TIMES expression .)
+    GE              reduce using rule 22 (expression -> expression TIMES expression .)
+    DO              reduce using rule 22 (expression -> expression TIMES expression .)
+    END             reduce using rule 22 (expression -> expression TIMES expression .)
+    SEMI            reduce using rule 22 (expression -> expression TIMES expression .)
+    RPAREN          reduce using rule 22 (expression -> expression TIMES expression .)
+
+  ! PLUS            [ shift and go to state 44 ]
+  ! MINUS           [ shift and go to state 45 ]
+  ! TIMES           [ shift and go to state 46 ]
+  ! DIVIDE          [ shift and go to state 47 ]
+  ! EQ              [ shift and go to state 48 ]
+  ! LT              [ shift and go to state 49 ]
+  ! GT              [ shift and go to state 50 ]
+  ! LE              [ shift and go to state 51 ]
+  ! GE              [ shift and go to state 52 ]
+
+
+state 63
+
+    (23) expression -> expression DIVIDE expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            reduce using rule 23 (expression -> expression DIVIDE expression .)
+    PLUS            reduce using rule 23 (expression -> expression DIVIDE expression .)
+    MINUS           reduce using rule 23 (expression -> expression DIVIDE expression .)
+    TIMES           reduce using rule 23 (expression -> expression DIVIDE expression .)
+    DIVIDE          reduce using rule 23 (expression -> expression DIVIDE expression .)
+    EQ              reduce using rule 23 (expression -> expression DIVIDE expression .)
+    LT              reduce using rule 23 (expression -> expression DIVIDE expression .)
+    GT              reduce using rule 23 (expression -> expression DIVIDE expression .)
+    LE              reduce using rule 23 (expression -> expression DIVIDE expression .)
+    GE              reduce using rule 23 (expression -> expression DIVIDE expression .)
+    DO              reduce using rule 23 (expression -> expression DIVIDE expression .)
+    END             reduce using rule 23 (expression -> expression DIVIDE expression .)
+    SEMI            reduce using rule 23 (expression -> expression DIVIDE expression .)
+    RPAREN          reduce using rule 23 (expression -> expression DIVIDE expression .)
+
+  ! PLUS            [ shift and go to state 44 ]
+  ! MINUS           [ shift and go to state 45 ]
+  ! TIMES           [ shift and go to state 46 ]
+  ! DIVIDE          [ shift and go to state 47 ]
+  ! EQ              [ shift and go to state 48 ]
+  ! LT              [ shift and go to state 49 ]
+  ! GT              [ shift and go to state 50 ]
+  ! LE              [ shift and go to state 51 ]
+  ! GE              [ shift and go to state 52 ]
+
+
+state 64
+
+    (24) expression -> expression EQ expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            reduce using rule 24 (expression -> expression EQ expression .)
+    EQ              reduce using rule 24 (expression -> expression EQ expression .)
+    LT              reduce using rule 24 (expression -> expression EQ expression .)
+    GT              reduce using rule 24 (expression -> expression EQ expression .)
+    LE              reduce using rule 24 (expression -> expression EQ expression .)
+    GE              reduce using rule 24 (expression -> expression EQ expression .)
+    DO              reduce using rule 24 (expression -> expression EQ expression .)
+    END             reduce using rule 24 (expression -> expression EQ expression .)
+    SEMI            reduce using rule 24 (expression -> expression EQ expression .)
+    RPAREN          reduce using rule 24 (expression -> expression EQ expression .)
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+
+  ! PLUS            [ reduce using rule 24 (expression -> expression EQ expression .) ]
+  ! MINUS           [ reduce using rule 24 (expression -> expression EQ expression .) ]
+  ! TIMES           [ reduce using rule 24 (expression -> expression EQ expression .) ]
+  ! DIVIDE          [ reduce using rule 24 (expression -> expression EQ expression .) ]
+  ! EQ              [ shift and go to state 48 ]
+  ! LT              [ shift and go to state 49 ]
+  ! GT              [ shift and go to state 50 ]
+  ! LE              [ shift and go to state 51 ]
+  ! GE              [ shift and go to state 52 ]
+
+
+state 65
+
+    (25) expression -> expression LT expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            reduce using rule 25 (expression -> expression LT expression .)
+    EQ              reduce using rule 25 (expression -> expression LT expression .)
+    LT              reduce using rule 25 (expression -> expression LT expression .)
+    GT              reduce using rule 25 (expression -> expression LT expression .)
+    LE              reduce using rule 25 (expression -> expression LT expression .)
+    GE              reduce using rule 25 (expression -> expression LT expression .)
+    DO              reduce using rule 25 (expression -> expression LT expression .)
+    END             reduce using rule 25 (expression -> expression LT expression .)
+    SEMI            reduce using rule 25 (expression -> expression LT expression .)
+    RPAREN          reduce using rule 25 (expression -> expression LT expression .)
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+
+  ! PLUS            [ reduce using rule 25 (expression -> expression LT expression .) ]
+  ! MINUS           [ reduce using rule 25 (expression -> expression LT expression .) ]
+  ! TIMES           [ reduce using rule 25 (expression -> expression LT expression .) ]
+  ! DIVIDE          [ reduce using rule 25 (expression -> expression LT expression .) ]
+  ! EQ              [ shift and go to state 48 ]
+  ! LT              [ shift and go to state 49 ]
+  ! GT              [ shift and go to state 50 ]
+  ! LE              [ shift and go to state 51 ]
+  ! GE              [ shift and go to state 52 ]
+
+
+state 66
+
+    (26) expression -> expression GT expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            reduce using rule 26 (expression -> expression GT expression .)
+    EQ              reduce using rule 26 (expression -> expression GT expression .)
+    LT              reduce using rule 26 (expression -> expression GT expression .)
+    GT              reduce using rule 26 (expression -> expression GT expression .)
+    LE              reduce using rule 26 (expression -> expression GT expression .)
+    GE              reduce using rule 26 (expression -> expression GT expression .)
+    DO              reduce using rule 26 (expression -> expression GT expression .)
+    END             reduce using rule 26 (expression -> expression GT expression .)
+    SEMI            reduce using rule 26 (expression -> expression GT expression .)
+    RPAREN          reduce using rule 26 (expression -> expression GT expression .)
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+
+  ! PLUS            [ reduce using rule 26 (expression -> expression GT expression .) ]
+  ! MINUS           [ reduce using rule 26 (expression -> expression GT expression .) ]
+  ! TIMES           [ reduce using rule 26 (expression -> expression GT expression .) ]
+  ! DIVIDE          [ reduce using rule 26 (expression -> expression GT expression .) ]
+  ! EQ              [ shift and go to state 48 ]
+  ! LT              [ shift and go to state 49 ]
+  ! GT              [ shift and go to state 50 ]
+  ! LE              [ shift and go to state 51 ]
+  ! GE              [ shift and go to state 52 ]
+
+
+state 67
+
+    (27) expression -> expression LE expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            reduce using rule 27 (expression -> expression LE expression .)
+    EQ              reduce using rule 27 (expression -> expression LE expression .)
+    LT              reduce using rule 27 (expression -> expression LE expression .)
+    GT              reduce using rule 27 (expression -> expression LE expression .)
+    LE              reduce using rule 27 (expression -> expression LE expression .)
+    GE              reduce using rule 27 (expression -> expression LE expression .)
+    DO              reduce using rule 27 (expression -> expression LE expression .)
+    END             reduce using rule 27 (expression -> expression LE expression .)
+    SEMI            reduce using rule 27 (expression -> expression LE expression .)
+    RPAREN          reduce using rule 27 (expression -> expression LE expression .)
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+
+  ! PLUS            [ reduce using rule 27 (expression -> expression LE expression .) ]
+  ! MINUS           [ reduce using rule 27 (expression -> expression LE expression .) ]
+  ! TIMES           [ reduce using rule 27 (expression -> expression LE expression .) ]
+  ! DIVIDE          [ reduce using rule 27 (expression -> expression LE expression .) ]
+  ! EQ              [ shift and go to state 48 ]
+  ! LT              [ shift and go to state 49 ]
+  ! GT              [ shift and go to state 50 ]
+  ! LE              [ shift and go to state 51 ]
+  ! GE              [ shift and go to state 52 ]
+
+
+state 68
+
+    (28) expression -> expression GE expression .
+    (20) expression -> expression . PLUS expression
+    (21) expression -> expression . MINUS expression
+    (22) expression -> expression . TIMES expression
+    (23) expression -> expression . DIVIDE expression
+    (24) expression -> expression . EQ expression
+    (25) expression -> expression . LT expression
+    (26) expression -> expression . GT expression
+    (27) expression -> expression . LE expression
+    (28) expression -> expression . GE expression
+
+    THEN            reduce using rule 28 (expression -> expression GE expression .)
+    EQ              reduce using rule 28 (expression -> expression GE expression .)
+    LT              reduce using rule 28 (expression -> expression GE expression .)
+    GT              reduce using rule 28 (expression -> expression GE expression .)
+    LE              reduce using rule 28 (expression -> expression GE expression .)
+    GE              reduce using rule 28 (expression -> expression GE expression .)
+    DO              reduce using rule 28 (expression -> expression GE expression .)
+    END             reduce using rule 28 (expression -> expression GE expression .)
+    SEMI            reduce using rule 28 (expression -> expression GE expression .)
+    RPAREN          reduce using rule 28 (expression -> expression GE expression .)
+    PLUS            shift and go to state 44
+    MINUS           shift and go to state 45
+    TIMES           shift and go to state 46
+    DIVIDE          shift and go to state 47
+
+  ! PLUS            [ reduce using rule 28 (expression -> expression GE expression .) ]
+  ! MINUS           [ reduce using rule 28 (expression -> expression GE expression .) ]
+  ! TIMES           [ reduce using rule 28 (expression -> expression GE expression .) ]
+  ! DIVIDE          [ reduce using rule 28 (expression -> expression GE expression .) ]
+  ! EQ              [ shift and go to state 48 ]
+  ! LT              [ shift and go to state 49 ]
+  ! GT              [ shift and go to state 50 ]
+  ! LE              [ shift and go to state 51 ]
+  ! GE              [ shift and go to state 52 ]
+
+
+state 69
+
+    (29) expression -> LPAREN expression RPAREN .
+
+    THEN            reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    PLUS            reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    MINUS           reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    TIMES           reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    DIVIDE          reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    EQ              reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    LT              reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    GT              reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    LE              reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    GE              reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    DO              reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    END             reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    SEMI            reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+
+
+state 70
+
+    (19) statement -> WHILE expression DO block .
+
+    END             reduce using rule 19 (statement -> WHILE expression DO block .)
+    SEMI            reduce using rule 19 (statement -> WHILE expression DO block .)
+
+
+state 71
+
+    (17) statement -> IF expression THEN block ELSE . block
+    (10) block -> . BEGIN statements END
+
+    BEGIN           shift and go to state 9
+
+    block                          shift and go to state 72
+
+state 72
+
+    (17) statement -> IF expression THEN block ELSE block .
+
+    END             reduce using rule 17 (statement -> IF expression THEN block ELSE block .)
+    SEMI            reduce using rule 17 (statement -> IF expression THEN block ELSE block .)
+
