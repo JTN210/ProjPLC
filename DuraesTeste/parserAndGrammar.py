@@ -48,8 +48,9 @@ def p_ids_single(p):
     p[0] = [p[1]]
 
 def p_type(p):
-    """type : INTEGER"""
-    p[0] = 'INTEGER' # Simplificado para este exemplo
+    """type : INTEGER
+            | BOOLEAN"""
+    p[0] = p[1].upper()
 
 # Bloco Principal
 def p_block(p):
@@ -118,6 +119,11 @@ def p_expression_num(p):
 def p_expression_id(p):
     """expression : ID"""
     p[0] = ('VAR_LOAD', p[1])
+
+def p_expression_bool(p):
+    """expression : TRUE
+                  | FALSE"""
+    p[0] = ('BOOL', p[1])
 
 def p_empty(p):
     """empty :"""

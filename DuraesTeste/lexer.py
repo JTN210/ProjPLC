@@ -18,6 +18,9 @@ reserved = {
     'mod': 'MOD',
     'for': 'FOR',
     'to': 'TO',
+    'true': 'TRUE',
+    'false': 'FALSE',
+    'boolean': 'BOOLEAN',
 }
 
 tokens = [

@@ -67,6 +67,10 @@ class CodeGenerator:
         elif tipo == 'NUM':
             self.emit(f'PUSHI {node[1]}')
 
+        elif tipo == 'BOOL':
+            val = 1 if node[1] == 'true' else 0
+            self.emit(f'PUSHI {val}')
+
         elif tipo == 'VAR_LOAD':
             addr = self.symbol_table[node[1]]
             self.emit(f'PUSHG {addr}')
