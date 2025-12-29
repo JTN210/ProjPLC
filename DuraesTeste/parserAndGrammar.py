@@ -79,20 +79,28 @@ def p_statement_readln(p):
     """statement : READLN LPAREN ID RPAREN"""
     p[0] = ('READLN', p[3])
 
+def p_stmt_or_block_stmt(p):
+    """stmt_or_block : statement"""
+    p[0] = [p[1]]
+
+def p_stmt_or_block_block(p):
+    """stmt_or_block : block"""
+    p[0] = p[1]
+
 def p_statement_if(p):
-    """statement : IF expression THEN block ELSE block
-                 | IF expression THEN block"""
+    """statement : IF expression THEN stmt_or_block ELSE stmt_or_block
+                 | IF expression THEN stmt_or_block"""
     if len(p) == 7:
         p[0] = ('IF', p[2], p[4], p[6]) # Com Else
     else:
         p[0] = ('IF', p[2], p[4], None) # Sem Else
 
 def p_statement_while(p):
-    """statement : WHILE expression DO block"""
+    """statement : WHILE expression DO stmt_or_block"""
     p[0] = ('WHILE', p[2], p[4])
 
 def p_statement_for(p):
-    """statement : FOR ID ASSIGN expression TO expression DO block"""
+    """statement : FOR ID ASSIGN expression TO expression DO stmt_or_block"""
     p[0] = ('FOR', p[2], p[4], p[6], p[8])
 
 # Expressões
