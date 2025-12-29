@@ -61,8 +61,17 @@ class CodeGenerator:
             self.generate(node[2]) # Esq
             self.generate(node[3]) # Dir
             ops = {'+': 'ADD', '-': 'SUB', '*': 'MUL', '/': 'DIV', 
-                   '=': 'EQUAL', '<': 'INF', '>': 'SUP', '<=': 'INFEQ', '>=': 'SUPEQ'}
+                   'div': 'DIV', 'mod': 'MOD',
+                   '=': 'EQUAL', '<': 'INF', '>': 'SUP', '<=': 'INFEQ', '>=': 'SUPEQ',
+                    'and': 'MUL', 'or': 'ADD'}
             self.emit(ops[op])
+
+        elif tipo == 'UNOP':
+            op = node[1]
+            self.generate(node[2])
+            if op == 'not':
+                self.emit('PUSHI 0')
+                self.emit('EQUAL')
 
         elif tipo == 'NUM':
             self.emit(f'PUSHI {node[1]}')

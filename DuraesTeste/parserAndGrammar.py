@@ -3,6 +3,9 @@ from lexer import tokens
 
 # Precedência de operadores
 precedence = (
+    ('left', 'OR'),
+    ('left', 'AND'),
+    ('right', 'NOT'),
     ('left', 'EQ', 'NEQ', 'LT', 'GT', 'LE', 'GE'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE', 'DIV', 'MOD'),
@@ -109,12 +112,20 @@ def p_expression_binop(p):
                   | expression MINUS expression
                   | expression TIMES expression
                   | expression DIVIDE expression
+                  | expression DIV expression
+                  | expression MOD expression
                   | expression EQ expression
                   | expression LT expression
                   | expression GT expression
                   | expression LE expression
-                  | expression GE expression"""
+                  | expression GE expression
+                  | expression AND expression
+                  | expression OR expression"""
     p[0] = ('BINOP', p[2], p[1], p[3])
+
+def p_expression_not(p):
+    """expression : NOT expression"""
+    p[0] = ('UNOP', p[1], p[2])
 
 def p_expression_group(p):
     """expression : LPAREN expression RPAREN"""
