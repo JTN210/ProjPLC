@@ -90,6 +90,10 @@ def p_statement_while(p):
     """statement : WHILE expression DO block"""
     p[0] = ('WHILE', p[2], p[4])
 
+def p_statement_for(p):
+    """statement : FOR ID ASSIGN expression TO expression DO block"""
+    p[0] = ('FOR', p[2], p[4], p[6], p[8])
+
 # Expressões
 def p_expression_binop(p):
     """expression : expression PLUS expression

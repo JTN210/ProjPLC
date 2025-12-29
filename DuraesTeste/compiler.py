@@ -104,6 +104,32 @@ class CodeGenerator:
             
             self.emit(f'{label_end}:')
 
+        elif tipo == 'FOR':
+            # Converte o for em assign inicial + while implícito
+            var_name = node[1]
+            start_expr = node[2]
+            end_expr = node[3]
+            body = node[4]
+
+            # Inicializa a variável do loop
+            init_assign = ('ASSIGN', var_name, start_expr)
+            self.generate(init_assign)
+
+            label_start = self.new_label()
+            label_end = self.new_label()
+
+            self.emit(f'{label_start}:')
+            condition = ('BINOP', '<=', ('VAR_LOAD', var_name), end_expr)
+            self.generate(condition)
+            self.emit(f'JZ {label_end}')
+
+            for stmt in body: self.generate(stmt)
+
+            increment = ('ASSIGN', var_name, ('BINOP', '+', ('VAR_LOAD', var_name), ('NUM', 1)))
+            self.generate(increment)
+            self.emit(f'JUMP {label_start}')
+            self.emit(f'{label_end}:')
+
 
     def visit_declarations(self, decls):
         # decls é uma lista de ('VAR', nome, tipo)

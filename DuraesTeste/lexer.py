@@ -15,7 +15,9 @@ reserved = {
     'readln': 'READLN',
     'writeln': 'WRITELN',
     'div': 'DIV',
-    'mod': 'MOD'
+    'mod': 'MOD',
+    'for': 'FOR',
+    'to': 'TO',
 }
 
 tokens = [
