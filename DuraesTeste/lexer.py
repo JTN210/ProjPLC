@@ -1,6 +1,6 @@
 import ply.lex as lex
 
-# Palavras reservadas (Pascal é case-insensitive, tratamos tudo como lower)
+# Palavras reservadas
 reserved = {
     'program': 'PROGRAM',
     'var': 'VAR',
@@ -24,13 +24,20 @@ reserved = {
     'and': 'AND',
     'or': 'OR',
     'not': 'NOT',
+    # NOVOS:
+    'array': 'ARRAY',
+    'of': 'OF',
+    'function': 'FUNCTION',
+    'procedure': 'PROCEDURE'
 }
 
 tokens = [
     'ID', 'NUM', 'STRING',
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
     'LPAREN', 'RPAREN', 'SEMI', 'COLON', 'COMMA', 'DOT',
-    'ASSIGN', 'EQ', 'NEQ', 'LT', 'GT', 'LE', 'GE'
+    'ASSIGN', 'EQ', 'NEQ', 'LT', 'GT', 'LE', 'GE',
+    # NOVOS TOKENS:
+    'LBRACKET', 'RBRACKET', 'DOTDOT' # [ ] ..
 ] + list(reserved.values())
 
 # Regras simples
@@ -40,10 +47,13 @@ t_TIMES   = r'\*'
 t_DIVIDE  = r'/'
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
+t_LBRACKET = r'\['
+t_RBRACKET = r'\]'
 t_SEMI    = r';'
 t_COLON   = r':'
 t_COMMA   = r','
 t_DOT     = r'\.'
+t_DOTDOT  = r'\.\.'  # Atenção: .. deve vir antes de . se usasses regex genérico, aqui é literal
 t_ASSIGN  = r':='
 t_EQ      = r'='
 t_NEQ     = r'<>'
@@ -52,26 +62,22 @@ t_GT      = r'>'
 t_LE      = r'<='
 t_GE      = r'>='
 
-# Strings (Pascal usa 'aspas simples')
 def t_STRING(t):
     r'\'[^\']*\''
-    t.value = t.value[1:-1] # Remove as aspas
+    t.value = t.value[1:-1]
     return t
 
-# Identificadores e Palavras Reservadas
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
-    t.value = t.value.lower() # Pascal é case-insensitive
+    t.value = t.value.lower()
     t.type = reserved.get(t.value, 'ID')
     return t
 
-# Números
 def t_NUM(t):
     r'\d+'
     t.value = int(t.value)
     return t
 
-# Ignorar espaços e comentários
 t_ignore = ' \t'
 
 def t_COMMENT(t):
@@ -83,8 +89,7 @@ def t_newline(t):
     t.lexer.lineno += len(t.value)
 
 def t_error(t):
-    print(f"Illegal character '{t.value[0]}' at line {t.lexer.lineno}")
+    print(f"Carácter ilegal '{t.value[0]}' na linha {t.lexer.lineno}")
     t.lexer.skip(1)
 
-# Build the lexer
 lexer = lex.lex()
