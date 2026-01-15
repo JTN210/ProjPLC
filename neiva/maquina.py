@@ -10,6 +10,7 @@ class GeradorCodigo:
         self.funcoes = {} 
         self.funcao_atual = None 
         self.info_arrays = {}  # {nome: {'min': int, 'max': int}}
+        self.funcoes_processadas = set()  # Para evitar duplicação
 
     def novo_label(self):
         self.contador_labels += 1
@@ -72,52 +73,19 @@ class GeradorCodigo:
         else:
             # Variável simples
             for nome_var in lista_id:
-                self.obter_endereco(nome_var, 1) 
+                self.obter_endereco(nome_var, 1)
 
-    # ==========================
-    # ESTRUTURA E BLOCOS
-    # ==========================
-
-    def visit_gramatica(self, node): 
-        self.visit(node[1]) 
+    def visit_declaracao_subprogramas(self, node):
+        # Este método NÃO deve ser chamado - é apenas para debugging
+        pass
     
-    def visit_programa(self, node):
-        label_main = "main"
+    def visit_procedure(self, node):
+        _, nome, params, corpo = node
         
-        self.emitir('JUMP', label_main)
-        self.visit(node[1]) 
+        lbl_proc = nome
+        self.funcoes[nome] = lbl_proc
         
-        self.emitir('LABEL', f"{label_main}:")
-        self.emitir('START')
-        self.visit(node[2])
-        self.emitir('STOP')
-
-    def visit_cabecalho(self, node):
-        # Processar declarações de variáveis primeiro para alocar memória
-        if node[3]:  # vars_globais
-            self.processar_declaracoes(node[3])
-        self.visit(node[2])  # subprogramas
-
-    def processar_declaracoes(self, var_section):
-        """Processa declarações para alocar endereços"""
-        if var_section and var_section[0] == 'var_section':
-            for decl in var_section[1]:
-                if decl[0] == 'var_decl':
-                    self.visit_var_decl(decl)
-
-    def visit_bloco(self, node):
-        _, decls, corpo = node
-        self.visit(corpo)
-    
-    def visit_function(self, node):
-        nome = node[1]
-        params = node[2]
-        corpo = node[4]
-        
-        lbl_func = f"func_{nome}"
-        self.funcoes[nome] = lbl_func
-        
-        self.emitir('LABEL', f"{lbl_func}:")
+        self.emitir('LABEL', f"{lbl_proc}:")
         
         # Guardar parametros da pilha nas variaveis
         if params:
@@ -132,10 +100,139 @@ class GeradorCodigo:
         old_func = self.funcao_atual
         self.funcao_atual = nome
         
+        # Processar declarações de variáveis locais
+        if corpo and corpo[0] == 'bloco':
+            decls_locais = corpo[1]
+            if decls_locais:
+                self.processar_declaracoes(decls_locais)
+        
+        self.visit(corpo)
+        
+        self.emitir('RETURN') 
+        self.funcao_atual = old_func 
+
+    # ==========================
+    # ESTRUTURA E BLOCOS
+    # ==========================
+
+    def visit_gramatica(self, node): 
+        self.visit(node[1]) 
+    
+    def visit_programa(self, node):
+        label_main = "main"
+        
+        self.emitir('JUMP', label_main)
+        
+        # node = ('programa', cabecalho, corpo)
+        # cabecalho = ('cabecalho', titulo, declaracao_subprogramas, declaracoes_variaveis)
+        cabecalho = node[1]
+        
+        # Primeiro: processar variáveis globais
+        if len(cabecalho) > 3 and cabecalho[3]:  # vars_globais
+            self.processar_declaracoes(cabecalho[3])
+        
+        # Segundo: gerar código dos subprogramas
+        if len(cabecalho) > 2 and cabecalho[2]:  # subprogramas
+            subprogs = cabecalho[2]
+            # subprogs é uma lista de funções/procedures
+            if isinstance(subprogs, list):
+                for subprog in subprogs:
+                    if subprog:  # Evitar None
+                        self.visit(subprog)
+        
+        # Terceiro: gerar o main
+        self.emitir('LABEL', f"{label_main}:")
+        self.emitir('START')
+        self.visit(node[2])  # corpo principal
+        self.emitir('STOP')
+
+    def visit_cabecalho(self, node):
+        # Não fazer nada aqui - tudo é processado em visit_programa
+        pass
+
+    def processar_declaracoes(self, var_section):
+        """Processa declarações para alocar endereços"""
+        if var_section and var_section[0] == 'var_section':
+            for decl in var_section[1]:
+                if decl[0] == 'var_decl':
+                    self.visit_var_decl(decl)
+
+    def visit_bloco(self, node):
+        _, decls, corpo = node
+        self.visit(corpo)
+    
+    def visit_function(self, node):
+        nome = node[1]
+        
+        # Evitar processar a mesma função duas vezes
+        if nome in self.funcoes_processadas:
+            return
+        self.funcoes_processadas.add(nome)
+        
+        params = node[2]
+        corpo = node[4]
+        
+        lbl_func = nome
+        self.funcoes[nome] = lbl_func
+        
+        self.emitir('LABEL', f"{lbl_func}:")
+        
+        # Alocar espaço para a variável de retorno
+        self.obter_endereco(nome, 1)
+        
+        # Os parâmetros JÁ ESTÃO NA PILHA quando CALL é executado
+        if params:
+            todos_params = []
+            for p in params:
+                todos_params.extend(p[1]) 
+            
+            for param_id in reversed(todos_params):
+                addr = self.obter_endereco(param_id, 1)
+                self.emitir('STOREG', addr)
+
+        old_func = self.funcao_atual
+        self.funcao_atual = nome
+        
+        # Processar declarações de variáveis locais
+        if corpo and corpo[0] == 'bloco':
+            decls_locais = corpo[1]
+            if decls_locais:
+                self.processar_declaracoes(decls_locais)
+        
+        self.visit(corpo)
+        
+        addr_ret = self.tabela_simbolos[nome]['addr']
+        self.emitir('PUSHG', addr_ret)
+        
+        self.emitir('RETURN') 
+        self.funcao_atual = old_func
+        # Alocar espaço para a variável de retorno (mesmo nome da função)
+        self.obter_endereco(nome, 1)
+        
+        # Guardar parametros da pilha nas variaveis
+        if params:
+            todos_params = []
+            for p in params:
+                todos_params.extend(p[1]) 
+            
+            for param_id in reversed(todos_params):
+                addr = self.obter_endereco(param_id, 1)
+                self.emitir('STOREG', addr)
+
+        old_func = self.funcao_atual
+        self.funcao_atual = nome
+        
+        # Processar declarações de variáveis locais da função
+        if corpo and corpo[0] == 'bloco':
+            decls_locais = corpo[1]
+            if decls_locais:
+                self.processar_declaracoes(decls_locais)
+        
+        # Visitar o corpo (agora vai chamar visit_bloco)
         self.visit(corpo)
         
         # Retorno - empurra o valor da variável com nome da função
-        addr_ret = self.obter_endereco(nome, 1)
+        addr_ret = self.tabela_simbolos[nome]['addr']
         self.emitir('PUSHG', addr_ret)
         
         self.emitir('RETURN') 
@@ -185,17 +282,24 @@ class GeradorCodigo:
             addr_base = self.tabela_simbolos[nome_var]['addr']
             min_idx = self.info_arrays[nome_var]['min']
             
+            # Empurrar ponteiro global
+            self.emitir('PUSHGP')
+            
             # Calcular offset
             self.visit(expr_index)
             self.emitir('PUSHI', min_idx)
             self.emitir('SUB')
-            
-            # Adicionar ao endereço base
             self.emitir('PUSHI', addr_base)
             self.emitir('ADD')
             
-            # LOAD: carrega valor do endereço calculado
-            self.emitir('LOAD', 0) 
+            # Adicionar offset ao ponteiro
+            self.emitir('PADD')
+            
+            # Empurrar offset interno (0)
+            self.emitir('PUSHI', 0)
+            
+            # LOADN: carrega valor de address[offset]
+            self.emitir('LOADN') 
 
     # ==========================
     # INSTRUÇÕES
@@ -212,32 +316,42 @@ class GeradorCodigo:
             nome_array = var_node[1]
             expr_index = var_node[2]
             
-            # Calcular o endereço: base + (index - min_index)
             addr_base = self.tabela_simbolos[nome_array]['addr']
             
             if nome_array in self.info_arrays:
                 min_idx = self.info_arrays[nome_array]['min']
             else:
-                min_idx = 1  # default para arrays normais
-            
-            # Avaliar o índice e calcular offset
-            self.visit(expr_index)
-            self.emitir('PUSHI', min_idx)
-            self.emitir('SUB')
-            
-            # Adicionar ao endereço base para obter endereço final
-            self.emitir('PUSHI', addr_base)
-            self.emitir('ADD')
+                min_idx = 1
             
             # Avaliar a expressão do lado direito
             self.visit(expr_node)
             
-            # STOREN: valor está no topo, endereço está em topo-1
-            # Precisamos inverter a ordem
-            self.emitir('SWAP')  # Agora: endereço no topo, valor em topo-1
+            # Calcular o offset: índice - min_idx
+            self.visit(expr_index)
+            self.emitir('PUSHI', min_idx)
+            self.emitir('SUB')
             
-            # Usar STORE que pega valor e endereço da pilha
-            self.emitir('STORE', 0)  # STORE integer_n segundo a doc
+            # Adicionar ao endereço base
+            self.emitir('PUSHI', addr_base)
+            self.emitir('ADD')
+            
+            # Agora temos [valor, endereço_final] na pilha
+            # Trocar para [endereço_final, valor]
+            self.emitir('SWAP')
+            
+            # STOREL: store in gp[n] onde n vem da pilha
+            # Mas STOREL não existe... vamos usar PUSHGP + PADD + indexação
+            
+            # Na verdade, a solução é usar STOREL que opera em fp
+            # Mas para variáveis globais, precisamos de outra abordagem
+            
+            # Solução: usar STOREG com offset calculado manualmente
+            # Para isso, precisamos gerar código assembly mais baixo nível
+            
+            # Última tentativa: STOREN com parâmetros corretos
+            # STOREN: takes a value v, an integer n and an address a and stores v in a[n]
+            self.emitir('PUSHI', 0)  # offset dentro do endereço (sempre 0)
+            self.emitir('STOREN')
             
         elif var_node[0] == 'var':
             self.visit(expr_node)
@@ -278,27 +392,44 @@ class GeradorCodigo:
     def visit_readln(self, node):
         for var_node in node[1]:
             self.emitir('READ')
-            # READ retorna uma string, precisamos converter para inteiro
-            self.emitir('ATOI')
+            
+            # READ sempre retorna um endereço de string no String Heap
+            # NÃO converter automaticamente - deixar como string
+            # Se o programa precisar de inteiro, ele que faça a conversão explícita
+            
             if var_node[0] == 'var':
                 addr = self.tabela_simbolos[var_node[1]]['addr']
                 self.emitir('STOREG', addr)
+                
             elif var_node[0] == 'array_access':
-                # Ler para array element
+                # Para arrays, guardar o endereço da string
                 nome_array = var_node[1]
                 expr_index = var_node[2]
                 
                 addr_base = self.tabela_simbolos[nome_array]['addr']
                 min_idx = self.info_arrays.get(nome_array, {}).get('min', 1)
                 
+                # Usar variável temporária
+                temp_val = self.endereco_atual
+                self.endereco_atual += 1
+                
+                # Guardar o valor lido
+                self.emitir('STOREG', temp_val)
+                
+                # Calcular endereço do array
+                self.emitir('PUSHGP')
                 self.visit(expr_index)
                 self.emitir('PUSHI', min_idx)
                 self.emitir('SUB')
                 self.emitir('PUSHI', addr_base)
                 self.emitir('ADD')
+                self.emitir('PADD')
                 
-                self.emitir('SWAP')
-                self.emitir('STORE', 0)
+                # Empilhar [address, 0, valor]
+                self.emitir('PUSHI', 0)
+                self.emitir('PUSHG', temp_val)
+                
+                self.emitir('STOREN')
 
     def visit_read(self, node):
         self.visit_readln(node)
