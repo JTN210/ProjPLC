@@ -1,4 +1,5 @@
-from sin import parse_string
+import sys
+from sin import parse_file, parse_string
 
 class TabelaSimbolos:
     def __init__(self):
@@ -435,102 +436,19 @@ class AnalisadorSemantico:
         self.visit_writeln(node)
 
 
-# ===== FUNÇÃO PRINCIPAL =====
-
-def analisar_semantica(codigo):
-    ast = parse_string(codigo)
-    if ast:
-        analisador = AnalisadorSemantico()
-        try:
-            analisador.visit(ast)
-            if not analisador.erros:
-                print("✓ Análise Semântica: SUCESSO!")
-                return True
-            else:
-                print("✗ Erros Semânticos encontrados:")
-                for erro in analisador.erros:
-                    print(f"  - {erro}")
-                return False
-        except Exception as e:
-            print(f"Erro interno: {e}")
-            import traceback
-            traceback.print_exc()
-            return False
-    else:
-        print("✗ Análise interrompida por erros de sintaxe.")
+# para testar com: python3 semantica.py
+def analisar_semantica(ast):
+    if not ast: return False
+    analisador = AnalisadorSemantico()
+    analisador.visit(ast)
+    if analisador.erros:
+        for erro in analisador.erros:
+            print(erro)
         return False
-
-
-# ===== TESTES =====
+    return True
 
 if __name__ == '__main__':
-    print("=" * 70)
-    print("TESTE 1: Exemplo BinToInt (do projeto)")
-    print("=" * 70)
-    codigo1 = """
-    program BinarioParaInteiro;
-    
-    function BinToInt(bin: string): integer;
-    var
-        i, valor, potencia: integer;
-    begin
-        valor := 0;
-        potencia := 1;
-        for i := length(bin) downto 1 do
-        begin
-            if bin[i] = '1' then
-                valor := valor + potencia;
-            potencia := potencia * 2;
-        end;
-        BinToInt := valor;
-    end;
-    
-    var
-        bin: string;
-        valor: integer;
-    begin
-        writeln('Introduza uma string binária:');
-        readln(bin);
-        valor := BinToInt(bin);
-        writeln('O valor inteiro correspondente é: ', valor);
-    end.
-    """
-    analisar_semantica(codigo1)
-
-    print("\n" + "=" * 70)
-    print("TESTE 2: Array do projeto")
-    print("=" * 70)
-    codigo2 = """
-    program SomaArray;
-    var
-        numeros: array[1..5] of integer;
-        i, soma: integer;
-    begin
-        soma := 0;
-        writeln('Introduza 5 números:');
-        for i := 1 to 5 do
-        begin
-            readln(numeros[i]);
-            soma := soma + numeros[i];
-        end;
-        writeln('A soma é: ', soma);
-    end.
-    """
-    analisar_semantica(codigo2)
-
-    print("\n" + "=" * 70)
-    print("TESTE 3: Erros propositados")
-    print("=" * 70)
-    codigo3 = """
-    program Erros;
-    var
-        x: integer;
-        y: real;
-    begin
-        x := 'texto';
-        naoExiste := 10;
-        if x then x := 1;
-        y := x + 'string';
-    end.
-    """
-    analisar_semantica(codigo3)
+    print("--- Teste da Semântica ---")
+    code = "program Teste; var x: integer; begin x := 10; end."
+    ast = parse_string(code)
+    analisar_semantica(ast)

@@ -1,0 +1,38 @@
+	JUMP main
+main:
+	START
+	PUSHI 0
+	STOREG 0
+	PUSHS "Introduza 5 números inteiros:"
+	WRITES
+	WRITELN
+	PUSHI 1
+	STOREG 1
+label1:
+	PUSHG 1
+	PUSHI 5
+	SUP
+	NOT
+	JZ label2
+	READ
+	ATOI
+	PUSHG 0
+	PUSHG 2
+	PUSHG 1
+	PUSHI 1
+	SUB
+	CHARAT
+	ADD
+	STOREG 0
+	PUSHG 1
+	PUSHI 1
+	ADD
+	STOREG 1
+	JUMP label1
+label2:
+	PUSHS "A soma dos números é: "
+	WRITES
+	PUSHG 0
+	WRITEI
+	WRITELN
+	STOP
