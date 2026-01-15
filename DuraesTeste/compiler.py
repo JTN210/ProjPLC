@@ -129,11 +129,19 @@ class CodeGenerator:
             op = node[1]
             self.generate(node[2])
             self.generate(node[3])
+            
             ops = {'+': 'ADD', '-': 'SUB', '*': 'MUL', '/': 'DIV', 
                    'div': 'DIV', 'mod': 'MOD',
-                   '=': 'EQUAL', '<': 'INF', '>': 'SUP', '<=': 'INFEQ', '>=': 'SUPEQ',
-                    'and': 'MUL', 'or': 'ADD'}
-            self.emit(ops[op])
+                   '=': 'EQUAL', '<': 'INF', '>': 'SUP', 
+                   '<=': 'INFEQ', '>=': 'SUPEQ',
+                   'and': 'MUL', 'or': 'ADD'}
+
+            if op == '<>':
+                # Como a VM não tem 'NEQ', fazemos EQUAL + NOT
+                self.emit('EQUAL')
+                self.emit('NOT')
+            else:
+                self.emit(ops[op]) 
 
         elif tipo == 'UNOP':
             op = node[1]
@@ -145,6 +153,13 @@ class CodeGenerator:
         elif tipo == 'NUM':
             self.emit(f'PUSHI {node[1]}')
 
+        elif tipo == 'BOOL':
+            val_str = str(node[1]).lower() # Garante que tratamos 'true'/'TRUE' da mesma forma
+            if val_str == 'true':
+                self.emit('PUSHI 1')
+            else:
+                self.emit('PUSHI 0')
+
         elif tipo == 'VAR_LOAD':
             self.check_variable(node[1])
             addr = self.symbol_table[node[1]]['addr']
@@ -155,17 +170,24 @@ class CodeGenerator:
             self.check_variable(name)
             info = self.symbol_table[name]
             
-            self.emit('PUSHGP')
-            self.emit(f"PUSHI {info['addr']}")
-            self.emit('PADD') # Stack: [BaseAddr]
+            # Se for STRING, usa CHARAT
+            if info['type'] in ['STRING', 'TYPE_STRING']:
+                self.emit(f"PUSHG {info['addr']}") # Stack: [StringRef]
+                self.generate(node[2])             # Stack: [StringRef, Indice]
+                # Nota: Pascal strings começam em 1, muitas VMs em 0. 
+                # Se a VM usar base-0, precisas de: self.emit('PUSHI 1'); self.emit('SUB')
+                self.emit('CHARAT')
             
-            self.generate(node[2]) 
-            self.emit(f"PUSHI {info['start']}")
-            self.emit('SUB') # Stack: [BaseAddr, Indice]
-            
-            # --- REMOVIDO: self.emit('PADD') ---
-            
-            self.emit('LOADN') # Consome BaseAddr e Indice
+            # Se for ARRAY normal
+            elif info['kind'] == 'array':
+                self.emit('PUSHGP')
+                self.emit(f"PUSHI {info['addr']}")
+                self.emit('PADD') 
+                self.generate(node[2]) 
+                self.emit(f"PUSHI {info['start']}")
+                self.emit('SUB') 
+                # Sem PADD extra aqui (correção anterior)
+                self.emit('LOADN')
 
         elif tipo == 'IF':
             label_else = self.new_label()
@@ -190,12 +212,13 @@ class CodeGenerator:
             self.emit(f'{label_end}:')
             
         elif tipo == 'FOR':
+             # node: ('FOR', var, start, end, body, direction)
              var_name = node[1]
              self.check_variable(var_name)
-             # (Lógica mantida do anterior)
              start_expr = node[2]
              end_expr = node[3]
              body = node[4]
+             direction = node[5] # 'TO' ou 'DOWNTO'
              
              # Inicializa
              self.generate(start_expr)
@@ -206,18 +229,30 @@ class CodeGenerator:
              label_end = self.new_label()
              
              self.emit(f'{label_start}:')
+             
              # Condição
              self.emit(f'PUSHG {addr}')
              self.generate(end_expr)
-             self.emit('INFEQ') # <=
+             
+             # --- LÓGICA DO DOWNTO ---
+             if direction == 'DOWNTO':
+                 self.emit('SUPEQ') # Se i >= fim, continua (loop inverso)
+             else:
+                 self.emit('INFEQ') # Se i <= fim, continua (loop normal)
+             
              self.emit(f'JZ {label_end}')
              
              for stmt in body: self.generate(stmt)
              
-             # Incremento
+             # Incremento/Decremento
              self.emit(f'PUSHG {addr}')
              self.emit('PUSHI 1')
-             self.emit('ADD')
+             
+             if direction == 'DOWNTO':
+                 self.emit('SUB') # i = i - 1
+             else:
+                 self.emit('ADD') # i = i + 1
+                 
              self.emit(f'STOREG {addr}')
              
              self.emit(f'JUMP {label_start}')
@@ -225,7 +260,25 @@ class CodeGenerator:
 
         elif tipo == 'CALL_PROC' or tipo == 'CALL_FUNC':
             name = node[1]
+            # O parser pode ou não enviar argumentos dependendo da regra.
+            # Se for CALL_FUNC com a nova regra, node[2] são os args.
+            args = node[2] if len(node) > 2 else []
+
+            # 1. Função Intrínseca: LENGTH
+            if name == 'length':
+                # Gera o código do argumento (deve ser uma string)
+                if args:
+                    self.generate(args[0]) 
+                    self.emit('STRLEN') # Transforma StringAddr em Tamanho(Int)
+                return
+
+            # 2. Funções de Utilizador
             if name in self.functions:
+                # Primeiro: Colocar argumentos na Stack
+                for arg in args:
+                    self.generate(arg)
+                
+                # Segundo: Chamar a função
                 self.emit(f"PUSHA {self.functions[name]}")
                 self.emit("CALL")
             else:
@@ -234,11 +287,11 @@ class CodeGenerator:
 
     def visit_declarations(self, decls):
         for decl in decls:
-            # decl structure: ('VAR', name, type)
-            # type pode ser 'INTEGER' ou ('ARRAY', start, end, subtype)
+            # decl: ('VAR', name, type)
             name = decl[1]
             dtype = decl[2]
             
+            # --- ATUALIZAÇÃO: Suporte a Arrays ---
             if isinstance(dtype, tuple) and dtype[0] == 'ARRAY':
                 start, end = dtype[1], dtype[2]
                 size = end - start + 1
@@ -249,30 +302,74 @@ class CodeGenerator:
                     'size': size,
                     'start': start
                 }
-                self.emit(f'PUSHI 0') # Inicializa primeiro elemento
-                self.emit(f'PUSHN {size-1}') # Reserva resto do espaço
+                self.emit(f'PUSHI 0') 
+                self.emit(f'PUSHN {size-1}') 
                 self.address_counter += size
+            
+            # --- ATUALIZAÇÃO: Suporte a String e Tipos Simples ---
             else:
+                # Se for STRING ou TYPE_STRING, tratamos como variável simples (ponteiro)
+                kind_type = 'string' if dtype in ['STRING', 'TYPE_STRING'] else dtype
+                
                 self.symbol_table[name] = {
                     'addr': self.address_counter, 
-                    'type': dtype, 
+                    'type': kind_type, 
                     'kind': 'var',
                     'size': 1
                 }
-                self.emit('PUSHI 0')
+                # Se for string, inicializa com string vazia ou 0
+                if kind_type == 'string':
+                    self.emit('PUSHS ""')
+                else:
+                    self.emit('PUSHI 0')
                 self.address_counter += 1
 
     def generate_subprogram(self, node):
-        # node: (TYPE, NAME, DECLS, BODY)
-        tipo, name, decls, body = node
+        if node[0] == 'FUNCTION':
+            _, name, args, decls, body, ret_type = node
+            # Variável de retorno (mesmo nome da função)
+            self.symbol_table[name] = {'addr': self.address_counter, 'type': ret_type, 'kind': 'var', 'size': 1}
+            self.emit('PUSHI 0') 
+            self.address_counter += 1
+        else:
+            _, name, args, decls, body = node
+
         label = self.new_label()
         self.functions[name] = label
         
         self.emit(f'{label}:')
-        # Nota: Variáveis locais não implementadas (complexidade scope). 
-        # Assumimos que usam variáveis globais por agora.
+        
+        # 1. Argumentos: Registar e Guardar valores da Stack
+        # Nota: Quem chama faz Push(Arg1), Push(Arg2). A Stack fica [Arg1, Arg2].
+        # Para guardar, temos de fazer POP inverso: Store(Arg2), Store(Arg1).
+        if args:
+            temp_args = []
+            for arg in args:
+                # arg: ('VAR', nome, tipo)
+                var_name = arg[1]
+                var_type = arg[2]
+                
+                # Regista na tabela de símbolos (SEM emitir PUSHI 0)
+                self.symbol_table[var_name] = {
+                    'addr': self.address_counter,
+                    'type': var_type,
+                    'kind': 'var',
+                    'size': 1
+                }
+                temp_args.append(self.address_counter)
+                self.address_counter += 1
+            
+            # Guardar os valores da stack nas variáveis (Ordem Inversa)
+            for addr in reversed(temp_args):
+                self.emit(f'STOREG {addr}')
+
+        if decls:
+            self.visit_declarations(decls)
+
+        # 3. Corpo
         for stmt in body:
             self.generate(stmt)
+            
         self.emit('RETURN')
 
     def get_code(self):

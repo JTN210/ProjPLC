@@ -24,11 +24,12 @@ reserved = {
     'and': 'AND',
     'or': 'OR',
     'not': 'NOT',
-    # NOVOS:
     'array': 'ARRAY',
     'of': 'OF',
     'function': 'FUNCTION',
-    'procedure': 'PROCEDURE'
+    'procedure': 'PROCEDURE',
+    'string': 'TYPE_STRING',
+    'downto': 'DOWNTO'
 }
 
 tokens = [
@@ -36,7 +37,6 @@ tokens = [
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
     'LPAREN', 'RPAREN', 'SEMI', 'COLON', 'COMMA', 'DOT',
     'ASSIGN', 'EQ', 'NEQ', 'LT', 'GT', 'LE', 'GE',
-    # NOVOS TOKENS:
     'LBRACKET', 'RBRACKET', 'DOTDOT' # [ ] ..
 ] + list(reserved.values())
 

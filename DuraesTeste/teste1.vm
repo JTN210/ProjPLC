@@ -1,0 +1,8 @@
+JUMP L1
+L1:
+START
+PUSHS "Ola, Mundo!"
+WRITES
+PUSHS "\n"
+WRITES
+STOP

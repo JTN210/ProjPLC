@@ -35,11 +35,38 @@ def p_subprograms(p):
     else:
         p[0] = []
 
+def p_args(p):
+    """args : LPAREN args_list RPAREN
+            | empty"""
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        p[0] = []
+
+def p_arg_item(p):
+    """arg_item : ids COLON type"""
+    vars = []
+    for var_name in p[1]:
+        vars.append(('VAR', var_name, p[3]))
+    p[0] = vars
+
+def p_args_list_multi(p):
+    """args_list : args_list SEMI arg_item
+                 | arg_item"""
+    if len(p) == 4:
+        p[0] = p[1] + p[3]
+    else:
+        p[0] = p[1]
+
 def p_subprogram(p):
-    """subprogram : FUNCTION ID SEMI decls block SEMI
-                  | PROCEDURE ID SEMI decls block SEMI"""
-    # Simplificação: Sem argumentos por agora
-    p[0] = (p[1].upper(), p[2], p[4], p[5]) # Tipo, Nome, VarsLocais, Corpo
+    """subprogram : FUNCTION ID args COLON type SEMI decls block SEMI
+                  | PROCEDURE ID args SEMI decls block SEMI"""
+    if p[1].upper() == 'FUNCTION':
+        # Tipo, Nome, Args, VarsLocais, Corpo, TipoRetorno
+        p[0] = ('FUNCTION', p[2], p[3], p[7], p[8], p[5]) 
+    else:
+        # Tipo, Nome, Args, VarsLocais, Corpo
+        p[0] = ('PROCEDURE', p[2], p[3], p[6], p[7])
 
 # --- Variáveis ---
 def p_var_list_multi(p):
@@ -66,10 +93,10 @@ def p_ids_single(p):
     """ids : ID"""
     p[0] = [p[1]]
 
-# Tipos (com Array)
 def p_type_simple(p):
     """type : INTEGER
-            | BOOLEAN"""
+            | BOOLEAN
+            | TYPE_STRING"""
     p[0] = p[1].upper()
 
 def p_type_array(p):
@@ -90,6 +117,9 @@ def p_statements_single(p):
     """statements : statement"""
     p[0] = [p[1]]
 
+def p_statement_empty(p):
+    """statement : empty"""
+    pass
 # --- Comandos ---
 
 # Atribuição Simples ou Array
@@ -148,8 +178,9 @@ def p_statement_while(p):
     p[0] = ('WHILE', p[2], p[4])
 
 def p_statement_for(p):
-    """statement : FOR ID ASSIGN expression TO expression DO stmt_or_block"""
-    p[0] = ('FOR', p[2], p[4], p[6], p[8])
+    """statement : FOR ID ASSIGN expression TO expression DO stmt_or_block
+                 | FOR ID ASSIGN expression DOWNTO expression DO stmt_or_block"""
+    p[0] = ('FOR', p[2], p[4], p[6], p[8], p[5])
 
 # Chamada de Função/Procedimento (Sem argumentos por simplicidade)
 def p_statement_call(p):
@@ -167,6 +198,7 @@ def p_expression_binop(p):
                   | expression DIV expression
                   | expression MOD expression
                   | expression EQ expression
+                  | expression NEQ expression
                   | expression LT expression
                   | expression GT expression
                   | expression LE expression
@@ -196,10 +228,13 @@ def p_expression_array_access(p):
     """expression : ID LBRACKET expression RBRACKET"""
     p[0] = ('ARRAY_LOAD', p[1], p[3]) # Nome, Índice
 
-# Chamada de Função em Expressão
 def p_expression_func_call(p):
-    """expression : ID LPAREN RPAREN""" # Simplificado: sem args
-    p[0] = ('CALL_FUNC', p[1])
+    """expression : ID LPAREN expr_list RPAREN
+                  | ID LPAREN RPAREN"""
+    if len(p) == 5:
+        p[0] = ('CALL_FUNC', p[1], p[3]) 
+    else:
+        p[0] = ('CALL_FUNC', p[1], [])
 
 def p_expression_bool(p):
     """expression : TRUE
