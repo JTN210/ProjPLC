@@ -1,14 +1,9 @@
-
 from sin import parse_string
 
 class TabelaSimbolos:
     def __init__(self):
-        # A tabela é uma lista de dicionários (pilha de escopos)
-        # O índice 0 é o escopo global
         self.escopos = [{}]
-        # Dicionário separado para funções/procedimentos para validar assinaturas e parâmetros
-        # Formato: { 'nome': { 'tipo_retorno': '...', 'params': ['TIPO1', 'TIPO2'] } }
-        self.funcoes = {} 
+        self.funcoes = {}
 
     def entrar_escopo(self):
         self.escopos.append({})
@@ -16,17 +11,19 @@ class TabelaSimbolos:
     def sair_escopo(self):
         self.escopos.pop()
 
-    def declarar_variavel(self, nome, tipo, detalhes=None):
-        # Declara no escopo atual (o último da lista)
+    def declarar_variavel(self, nome, tipo_info):
+        """
+        tipo_info é um dicionário:
+        - Para tipos simples: {'categoria': 'INTEGER', 'tipo_base': None}
+        - Para arrays: {'categoria': 'ARRAY', 'min_index': 1, 'max_index': 5, 'tipo_base': 'INTEGER'}
+        """
         escopo_atual = self.escopos[-1]
         if nome in escopo_atual:
-            return False  # Erro: Variável já existe neste escopo
-        # Guarda o tipo e detalhes (útil para arrays)
-        escopo_atual[nome] = {'tipo': tipo, 'detalhes': detalhes}
+            return False
+        escopo_atual[nome] = tipo_info
         return True
 
     def procurar_variavel(self, nome):
-        # Procura do escopo atual até ao global (de trás para a frente)
         for escopo in reversed(self.escopos):
             if nome in escopo:
                 return escopo[nome]
@@ -46,147 +43,125 @@ class AnalisadorSemantico:
     def __init__(self):
         self.tabela = TabelaSimbolos()
         self.erros = []
-        self.tipo_retorno_atual = None # Para verificar se o return da função coincide
+        self.tipo_retorno_atual = None
 
     def registar_erro(self, msg):
         self.erros.append(f"Erro Semântico: {msg}")
 
     def visit(self, node):
-        """Método despachante que visita o nó apropriado baseado no tipo"""
         if node is None:
             return None
         
-        # Se for uma lista (ex: lista de instruções), visita cada elemento
         if isinstance(node, list):
             for item in node:
                 self.visit(item)
-            return
+            return None
 
-        # Se for um valor primitivo, retorna o seu tipo em Pascal
-        if isinstance(node, (int, float, str, bool)):
-            if isinstance(node, bool): return 'BOOLEAN'
-            if isinstance(node, int): return 'INTEGER'
-            if isinstance(node, float): return 'REAL'
-            if isinstance(node, str): return 'STRING'
+        # Valores primitivos retornam tipo diretamente
+        if isinstance(node, bool):
+            return {'categoria': 'BOOLEAN'}
+        if isinstance(node, int):
+            return {'categoria': 'INTEGER'}
+        if isinstance(node, float):
+            return {'categoria': 'REAL'}
+        if isinstance(node, str):
+            return {'categoria': 'STRING'}
 
-        # Se for uma tupla da AST: ('tipo_no', dados...)
         if isinstance(node, tuple):
             tipo_no = node[0]
-            # Constrói o nome do método: visit_program, visit_var_decl, etc.
             metodo_nome = f'visit_{tipo_no}'
-            # Tenta chamar o método, se não existir chama o genérico
             visitante = getattr(self, metodo_nome, self.visit_generico)
             return visitante(node)
         
         return None
 
     def visit_generico(self, node):
-        # Útil para debug se aparecer algum nó novo não tratado
-        # print(f"AVISO: Nó não tratado na análise semântica: {node[0]}")
         return None
 
-    # --------------------------------------------------------------------------
-    # 1. ESTRUTURA DO PROGRAMA
-    # --------------------------------------------------------------------------
+    # ===== ESTRUTURA DO PROGRAMA =====
 
     def visit_gramatica(self, node):
-        # Tupla gerada em sin.py: ('gramatica', programa)
         self.visit(node[1])
 
     def visit_programa(self, node):
-        # Tupla: ('programa', cabecalho, corpo)
         _, cabecalho, corpo = node
-        self.visit(cabecalho) # Processa declarações globais
-        self.visit(corpo)     # Processa o bloco principal
+        self.visit(cabecalho)
+        self.visit(corpo)
 
     def visit_cabecalho(self, node):
-        # Tupla: ('cabecalho', titulo, declaracao_subprogramas, declaracoes_variaveis)
         _, titulo, subprogs, vars_globais = node
         
-        # Nota: O Pascal permite recursão e chamadas forward.
-        # No entanto, conforme a gramática, vamos processar na ordem.
-        
-        # Processar variáveis globais
         if vars_globais:
             self.visit(vars_globais)
             
-        # Processar subprogramas (funções e procedimentos)
         if subprogs:
             self.visit(subprogs)
 
-    # --------------------------------------------------------------------------
-    # 2. DECLARAÇÕES DE VARIÁVEIS
-    # --------------------------------------------------------------------------
+    # ===== DECLARAÇÕES DE VARIÁVEIS =====
 
     def visit_var_section(self, node):
-        # Tupla: ('var_section', [lista_de_declaracoes])
         self.visit(node[1])
 
     def visit_var_decl(self, node):
-        # Tupla: ('var_decl', [lista_ids], tipo)
         _, lista_id, tipo_raw = node
         
-        # Verificar se é um array ou um tipo simples
-        tipo_final = str(tipo_raw).upper()
-        detalhes_array = None
-
-        # Na tua gramática, tipo_array retorna: ('array', min, max, tipo_base)
+        # Construir tipo_info estruturado
         if isinstance(tipo_raw, tuple) and tipo_raw[0] == 'array':
-            tipo_final = 'ARRAY'
-            detalhes_array = tipo_raw 
+            # tipo_raw = ('array', min, max, tipo_base)
+            tipo_info = {
+                'categoria': 'ARRAY',
+                'min_index': tipo_raw[1],
+                'max_index': tipo_raw[2],
+                'tipo_base': str(tipo_raw[3]).upper()
+            }
+        else:
+            tipo_info = {
+                'categoria': str(tipo_raw).upper(),
+                'tipo_base': None
+            }
 
         for nome_var in lista_id:
-            sucesso = self.tabela.declarar_variavel(nome_var, tipo_final, detalhes_array)
+            sucesso = self.tabela.declarar_variavel(nome_var, tipo_info)
             if not sucesso:
-                self.registar_erro(f"A variável '{nome_var}' já foi declarada neste escopo.")
+                self.registar_erro(f"Variável '{nome_var}' já declarada neste escopo.")
 
-    # --------------------------------------------------------------------------
-    # 3. SUBPROGRAMAS (PROCEDURES E FUNCTIONS)
-    # --------------------------------------------------------------------------
+    # ===== SUBPROGRAMAS =====
 
     def visit_function(self, node):
-        # Tupla: ('function', nome, params, tipo_retorno, corpo)
         _, nome, params, tipo_ret, corpo = node
         
-        # Coletar tipos dos parâmetros para a assinatura da função
         tipos_params = []
         if params:
             for p in params:
-                # p format: ('param', [ids], tipo)
                 tipo_p = str(p[2]).upper()
-                quantidade = len(p[1]) # Quantos IDs têm este tipo
+                quantidade = len(p[1])
                 for _ in range(quantidade):
                     tipos_params.append(tipo_p)
 
         tipo_ret_str = str(tipo_ret).upper()
         
-        # Regista a função no escopo global (ou atual)
         if not self.tabela.declarar_funcao(nome, tipo_ret_str, tipos_params):
-            self.registar_erro(f"A função '{nome}' já se encontra definida.")
+            self.registar_erro(f"Função '{nome}' já definida.")
 
-        # --- Entrar no escopo da função ---
         self.tabela.entrar_escopo()
         self.tipo_retorno_atual = tipo_ret_str
 
-        # Em Pascal, o nome da função é usado como variável de retorno
-        self.tabela.declarar_variavel(nome, tipo_ret_str)
+        # Nome da função como variável de retorno
+        self.tabela.declarar_variavel(nome, {'categoria': tipo_ret_str, 'tipo_base': None})
 
-        # Declarar parâmetros como variáveis locais
         if params:
             for p in params:
                 ids_params = p[1]
                 tipo_p = str(p[2]).upper()
                 for pid in ids_params:
-                    self.tabela.declarar_variavel(pid, tipo_p)
+                    self.tabela.declarar_variavel(pid, {'categoria': tipo_p, 'tipo_base': None})
 
-        # Visita o corpo (que contém declarações locais + instruções)
         self.visit(corpo)
 
         self.tabela.sair_escopo()
         self.tipo_retorno_atual = None
 
     def visit_procedure(self, node):
-        # Tupla: ('procedure', nome, params, corpo)
         _, nome, params, corpo = node
         
         tipos_params = []
@@ -197,9 +172,8 @@ class AnalisadorSemantico:
                 for _ in range(quantidade):
                     tipos_params.append(tipo_p)
 
-        # Procedure tem retorno None
         if not self.tabela.declarar_funcao(nome, None, tipos_params):
-            self.registar_erro(f"O procedimento '{nome}' já se encontra definido.")
+            self.registar_erro(f"Procedimento '{nome}' já definido.")
 
         self.tabela.entrar_escopo()
 
@@ -208,229 +182,252 @@ class AnalisadorSemantico:
                 ids_params = p[1]
                 tipo_p = str(p[2]).upper()
                 for pid in ids_params:
-                    self.tabela.declarar_variavel(pid, tipo_p)
+                    self.tabela.declarar_variavel(pid, {'categoria': tipo_p, 'tipo_base': None})
 
         self.visit(corpo)
         self.tabela.sair_escopo()
 
     def visit_bloco(self, node):
-        # Tupla: ('bloco', declaracoes_variaveis, corpo)
         _, decls, corpo_instrucoes = node
         if decls:
             self.visit(decls)
         self.visit(corpo_instrucoes)
 
-    # --------------------------------------------------------------------------
-    # 4. INSTRUÇÕES E CONTROLE DE FLUXO
-    # --------------------------------------------------------------------------
+    # ===== INSTRUÇÕES =====
 
     def visit_begin_end(self, node):
-        # Tupla: ('begin_end', [lista_instrucoes])
         self.visit(node[1])
 
     def visit_assign(self, node):
-        # Tupla: ('assign', variavel, expressao)
         _, var_node, expr_node = node
         
-        # Determinar tipo da variável (L-Value) e da expressão (R-Value)
         tipo_var = self.visit(var_node)
         tipo_expr = self.visit(expr_node)
 
-        if tipo_var and tipo_expr:
-            # Tipos iguais são sempre compatíveis
-            if tipo_var == tipo_expr:
-                return
-            
-            # Pascal permite atribuir Integer a uma variável Real (coerção implícita)
-            if tipo_var == 'REAL' and tipo_expr == 'INTEGER':
-                return
-            
-            self.registar_erro(f"Atribuição incompatível: tentou atribuir '{tipo_expr}' à variável do tipo '{tipo_var}'.")
+        if not tipo_var or not tipo_expr:
+            return
+
+        cat_var = tipo_var['categoria']
+        cat_expr = tipo_expr['categoria']
+
+        if cat_var == cat_expr:
+            return
+        
+        # Coerção INTEGER → REAL
+        if cat_var == 'REAL' and cat_expr == 'INTEGER':
+            return
+        
+        self.registar_erro(f"Atribuição incompatível: '{cat_expr}' → '{cat_var}'")
 
     def visit_if(self, node):
-        # Tupla: ('if', condicao, then_stmt, else_stmt)
         _, cond, stmt_then, stmt_else = node
         
         tipo_cond = self.visit(cond)
-        if tipo_cond != 'BOOLEAN':
-            self.registar_erro(f"A condição do IF deve ser BOOLEAN. Recebido: {tipo_cond}")
+        if tipo_cond and tipo_cond['categoria'] != 'BOOLEAN':
+            self.registar_erro(f"Condição IF deve ser BOOLEAN, não {tipo_cond['categoria']}")
         
         self.visit(stmt_then)
         if stmt_else:
             self.visit(stmt_else)
 
     def visit_while(self, node):
-        # Tupla: ('while', condicao, corpo)
         _, cond, corpo = node
         tipo_cond = self.visit(cond)
-        if tipo_cond != 'BOOLEAN':
-            self.registar_erro(f"A condição do WHILE deve ser BOOLEAN. Recebido: {tipo_cond}")
+        if tipo_cond and tipo_cond['categoria'] != 'BOOLEAN':
+            self.registar_erro(f"Condição WHILE deve ser BOOLEAN, não {tipo_cond['categoria']}")
         self.visit(corpo)
 
     def visit_for(self, node):
-        # Tupla: ('for', id_variavel, inicio, fim, direcao, corpo)
         _, var_nome, inicio, fim, direcao, corpo = node
         
-        # Verificar variável de controlo
         var_info = self.tabela.procurar_variavel(var_nome)
         if not var_info:
-            self.registar_erro(f"A variável de controlo do FOR '{var_nome}' não foi declarada.")
-        elif var_info['tipo'] != 'INTEGER':
-            self.registar_erro(f"A variável de controlo do FOR deve ser INTEGER.")
+            self.registar_erro(f"Variável de controlo '{var_nome}' não declarada.")
+        elif var_info['categoria'] != 'INTEGER':
+            self.registar_erro(f"Variável de controlo do FOR deve ser INTEGER.")
 
-        # Verificar limites
         t_inicio = self.visit(inicio)
         t_fim = self.visit(fim)
         
-        if t_inicio != 'INTEGER' or t_fim != 'INTEGER':
-            self.registar_erro("Os limites do ciclo FOR devem ser inteiros.")
+        if t_inicio and t_inicio['categoria'] != 'INTEGER':
+            self.registar_erro("Limite inicial do FOR deve ser INTEGER.")
+        if t_fim and t_fim['categoria'] != 'INTEGER':
+            self.registar_erro("Limite final do FOR deve ser INTEGER.")
             
         self.visit(corpo)
 
-    # --------------------------------------------------------------------------
-    # 5. EXPRESSÕES
-    # --------------------------------------------------------------------------
+    # ===== EXPRESSÕES =====
 
     def visit_binop(self, node):
-        # Tupla: ('binop', operador, esquerda, direita)
         _, op, esq, dir_node = node
         
         t_esq = self.visit(esq)
         t_dir = self.visit(dir_node)
-
-        # Se algum dos operandos já deu erro antes, aborta para não gerar ruído
+        
         if not t_esq or not t_dir:
-            return None 
-
+            return {'categoria': 'REAL'}  # Tipo dummy para evitar cascata de erros
+        
+        cat_esq = t_esq['categoria']
+        cat_dir = t_dir['categoria']
+        
         # Operações Aritméticas
-        if op in ['+', '-', '*', '/', 'DIV', 'MOD']:
-            is_int = (t_esq == 'INTEGER' and t_dir == 'INTEGER')
-            is_num = (t_esq in ['INTEGER', 'REAL'] and t_dir in ['INTEGER', 'REAL'])
-
+        if op in ['+', '-', '*', '/', 'div', 'mod']:
+            # Concatenação de strings (apenas com +)
+            if op == '+' and (cat_esq == 'STRING' or cat_dir == 'STRING'):
+                if cat_esq != 'STRING' or cat_dir != 'STRING':
+                    self.registar_erro("Concatenação requer ambos os operandos STRING.")
+                return {'categoria': 'STRING'}
+            
+            is_int = (cat_esq == 'INTEGER' and cat_dir == 'INTEGER')
+            is_num = (cat_esq in ['INTEGER', 'REAL'] and cat_dir in ['INTEGER', 'REAL'])
+            
             if not is_num:
-                self.registar_erro(f"O operador aritmético '{op}' requer números. Recebido: {t_esq}, {t_dir}")
-                return 'REAL' # Retorna um tipo dummy para evitar cascata de erros
-
-            if op == '/': return 'REAL' # Divisão real resulta sempre em REAL
+                self.registar_erro(f"Operador '{op}' requer números, não {cat_esq} e {cat_dir}")
+                return {'categoria': 'REAL'}
             
-            if op in ['DIV', 'MOD']:
+            if op == '/':
+                return {'categoria': 'REAL'}  # Divisão real sempre retorna REAL
+            
+            if op in ['div', 'mod']:
                 if not is_int:
-                    self.registar_erro(f"Os operadores DIV e MOD requerem operandos inteiros.")
-                return 'INTEGER'
+                    self.registar_erro("DIV/MOD requerem operandos INTEGER.")
+                return {'categoria': 'INTEGER'}
             
-            # Para +, -, * : Se houver um Real, o resultado é Real
-            if t_esq == 'REAL' or t_dir == 'REAL':
-                return 'REAL'
-            return 'INTEGER'
-
+            # Para +, -, *: se houver REAL, resultado é REAL
+            if cat_esq == 'REAL' or cat_dir == 'REAL':
+                return {'categoria': 'REAL'}
+            return {'categoria': 'INTEGER'}
+        
         # Operações Relacionais
         if op in ['=', '<>', '!=', '<', '<=', '>', '>=']:
-            if t_esq != t_dir:
-                # Exceção: Permite comparar int com real
-                if not (t_esq in ['INTEGER', 'REAL'] and t_dir in ['INTEGER', 'REAL']):
-                     self.registar_erro(f"Comparação inválida entre tipos {t_esq} e {t_dir}.")
-            return 'BOOLEAN'
-
+            if cat_esq != cat_dir:
+                # Permite comparações entre números (INTEGER vs REAL)
+                is_num = (cat_esq in ['INTEGER', 'REAL'] and cat_dir in ['INTEGER', 'REAL'])
+                
+                # Permite comparações entre CHAR e STRING (ex: bin[i] = '1')
+                # Isto é comum em Pascal quando se indexa strings
+                is_char_str = (cat_esq in ['CHAR', 'STRING'] and cat_dir in ['CHAR', 'STRING'])
+                
+                if not is_num and not is_char_str:
+                    self.registar_erro(f"Comparação inválida: {cat_esq} vs {cat_dir}")
+            
+            return {'categoria': 'BOOLEAN'}
+        
         # Operações Lógicas
-        if op.lower() in ['and', 'or']:
-            if t_esq != 'BOOLEAN' or t_dir != 'BOOLEAN':
-                self.registar_erro(f"O operador lógico '{op}' requer operandos BOOLEAN.")
-            return 'BOOLEAN'
-
-        return None
+        if op in ['and', 'or']:
+            if cat_esq != 'BOOLEAN' or cat_dir != 'BOOLEAN':
+                self.registar_erro(f"Operador lógico '{op}' requer operandos BOOLEAN.")
+            return {'categoria': 'BOOLEAN'}
+        
+        return {'categoria': 'REAL'}
 
     def visit_unop(self, node):
-        # Tupla: ('unop', op, operando)
         _, op, operand = node
         t = self.visit(operand)
         
-        if op.lower() == 'not':
-            if t != 'BOOLEAN': self.registar_erro("O operador NOT requer BOOLEAN.")
-            return 'BOOLEAN'
+        if not t:
+            return None
+        
+        cat = t['categoria']
+        
+        if op == 'not':
+            if cat != 'BOOLEAN':
+                self.registar_erro("NOT requer BOOLEAN.")
+            return {'categoria': 'BOOLEAN'}
+        
         if op in ['+', '-']:
-            if t not in ['INTEGER', 'REAL']: self.registar_erro(f"O sinal unário '{op}' requer um número.")
+            if cat not in ['INTEGER', 'REAL']:
+                self.registar_erro(f"Sinal unário '{op}' requer número.")
             return t
+        
         return t
 
-    # --------------------------------------------------------------------------
-    # 6. ACESSO A VARIÁVEIS E CHAMADAS
-    # --------------------------------------------------------------------------
+    # ===== VARIÁVEIS E ACESSO =====
 
     def visit_var(self, node):
-        # Tupla: ('var', ID)
         nome = node[1]
         info = self.tabela.procurar_variavel(nome)
         if not info:
-            self.registar_erro(f"A variável '{nome}' não foi declarada.")
+            self.registar_erro(f"Variável '{nome}' não declarada.")
             return None
-        return info['tipo']
+        return info
 
     def visit_array_access(self, node):
-        # Tupla: ('array_access', nome, indice_expr)
         _, nome, expr_index = node
         info = self.tabela.procurar_variavel(nome)
         
         if not info:
-            self.registar_erro(f"O array '{nome}' não foi declarado.")
+            self.registar_erro(f"'{nome}' não foi declarado.")
             return None
         
-        if info['tipo'] != 'ARRAY':
-            self.registar_erro(f"A variável '{nome}' não é do tipo array.")
-            return info['tipo']
-
         t_index = self.visit(expr_index)
-        if t_index != 'INTEGER':
-            self.registar_erro("O índice do array deve ser do tipo INTEGER.")
+        if t_index and t_index['categoria'] != 'INTEGER':
+            self.registar_erro("Índice de array/string deve ser INTEGER.")
 
-        # Retorna o tipo base do array guardado nos detalhes
-        # detalhes = ('array', min, max, tipo_base)
-        return str(info['detalhes'][3]).upper()
+        # Strings podem ser indexadas → retorna CHAR
+        if info['categoria'] == 'STRING':
+            return {'categoria': 'CHAR'}
+        
+        if info['categoria'] != 'ARRAY':
+            self.registar_erro(f"'{nome}' não é array ou string.")
+            return info
+
+        return {'categoria': info['tipo_base']}
 
     def visit_call(self, node):
-        # Tupla: ('call', nome, [lista_args])
         _, nome, args = node
 
-        # Caso especial: LENGTH (built-in)
+        # Built-in: LENGTH
         if nome.lower() == 'length':
             if len(args) != 1:
-                self.registar_erro("A função 'length' requer exatamente 1 argumento.")
-            self.visit(args[0])
-            return 'INTEGER'
+                self.registar_erro("LENGTH requer 1 argumento.")
+            else:
+                arg_tipo = self.visit(args[0])
+                if arg_tipo and arg_tipo['categoria'] not in ['STRING', 'ARRAY']:
+                    self.registar_erro("LENGTH requer STRING ou ARRAY.")
+            return {'categoria': 'INTEGER'}
 
         func_info = self.tabela.procurar_funcao(nome)
         if not func_info:
-            self.registar_erro(f"O subprograma '{nome}' não foi declarado.")
+            self.registar_erro(f"Função/Procedimento '{nome}' não declarado.")
             return None
 
         params_esperados = func_info['params']
         if len(args) != len(params_esperados):
-            self.registar_erro(f"A chamada a '{nome}' espera {len(params_esperados)} argumentos, mas recebeu {len(args)}.")
-            return func_info['tipo_retorno']
+            self.registar_erro(
+                f"'{nome}' espera {len(params_esperados)} args, recebeu {len(args)}."
+            )
+            if func_info['tipo_retorno']:
+                return {'categoria': func_info['tipo_retorno']}
+            return None
 
-        # Validar tipos dos argumentos
-        for i, (arg_node, tipo_esperado) in enumerate(zip(args, params_esperados)):
+        # Validar tipos
+        for i, (arg_node, tipo_esp) in enumerate(zip(args, params_esperados)):
             tipo_passado = self.visit(arg_node)
-            if tipo_passado != tipo_esperado:
-                # Exceção: Passar Integer onde se espera Real é válido
-                if not (tipo_esperado == 'REAL' and tipo_passado == 'INTEGER'):
-                    self.registar_erro(f"Argumento {i+1} de '{nome}' incompatível: esperava {tipo_esperado}, recebeu {tipo_passado}.")
+            if tipo_passado:
+                cat_pass = tipo_passado['categoria']
+                if cat_pass != tipo_esp:
+                    if not (tipo_esp == 'REAL' and cat_pass == 'INTEGER'):
+                        self.registar_erro(
+                            f"Arg {i+1} de '{nome}': esperava {tipo_esp}, recebeu {cat_pass}"
+                        )
 
-        return func_info['tipo_retorno']
+        if func_info['tipo_retorno']:
+            return {'categoria': func_info['tipo_retorno']}
+        return None
 
-    def visit_readln(self, node): # Trata também o read
-        # Tupla: ('readln', [lista_vars])
+    def visit_readln(self, node):
         for v in node[1]:
-            self.visit(v)
-            # Verifica se estamos a ler para uma variável válida e existente
+            tipo = self.visit(v)
+            # Verifica se é L-value válido (variável ou array access)
             if isinstance(v, tuple) and v[0] == 'var':
                 if not self.tabela.procurar_variavel(v[1]):
-                    self.registar_erro(f"A variável '{v[1]}' usada no read/readln não existe.")
+                    self.registar_erro(f"Variável '{v[1]}' no readln não existe.")
     
     def visit_read(self, node):
         self.visit_readln(node)
 
-    def visit_writeln(self, node): # Trata também o write
-        # Tupla: ('writeln', [lista_exprs])
+    def visit_writeln(self, node):
         for expr in node[1]:
             self.visit(expr)
             
@@ -438,41 +435,39 @@ class AnalisadorSemantico:
         self.visit_writeln(node)
 
 
-# --------------------------------------------------------------------------
-# FUNÇÕES PARA EXECUÇÃO E TESTE
-# --------------------------------------------------------------------------
+# ===== FUNÇÃO PRINCIPAL =====
 
 def analisar_semantica(codigo):
-    """
-    Função principal que integra o parser e a análise semântica.
-    Recebe o código fonte como string.
-    """
     ast = parse_string(codigo)
     if ast:
         analisador = AnalisadorSemantico()
         try:
             analisador.visit(ast)
             if not analisador.erros:
-                print("✓ Análise Semântica: SUCESSO! O código é válido.")
+                print("✓ Análise Semântica: SUCESSO!")
                 return True
             else:
-                print("✗ Foram encontrados Erros Semânticos:")
+                print("✗ Erros Semânticos encontrados:")
                 for erro in analisador.erros:
                     print(f"  - {erro}")
                 return False
         except Exception as e:
-            print(f"Erro interno no analisador: {e}")
-            # Importa traceback apenas para debug em caso de crash
+            print(f"Erro interno: {e}")
             import traceback
             traceback.print_exc()
             return False
     else:
-        print("✗ A análise foi interrompida devido a erros de sintaxe.")
+        print("✗ Análise interrompida por erros de sintaxe.")
         return False
 
+
+# ===== TESTES =====
+
 if __name__ == '__main__':
-    # Teste com o Exemplo 5 (Função BinToInt) do enunciado
-    codigo_teste = """
+    print("=" * 70)
+    print("TESTE 1: Exemplo BinToInt (do projeto)")
+    print("=" * 70)
+    codigo1 = """
     program BinarioParaInteiro;
     
     function BinToInt(bin: string): integer;
@@ -500,23 +495,42 @@ if __name__ == '__main__':
         writeln('O valor inteiro correspondente é: ', valor);
     end.
     """
-    
-    print("=" * 60)
-    print("TESTE SEMÂNTICO: Exemplo BinToInt")
-    print("=" * 60)
-    analisar_semantica(codigo_teste)
+    analisar_semantica(codigo1)
 
-    # Teste de Erros para verificar a validação
-    print("\n" + "=" * 60)
-    print("TESTE DE ERROS COMUNS")
-    print("=" * 60)
-    codigo_erro = """
-    program Erros;
-    var x: integer;
+    print("\n" + "=" * 70)
+    print("TESTE 2: Array do projeto")
+    print("=" * 70)
+    codigo2 = """
+    program SomaArray;
+    var
+        numeros: array[1..5] of integer;
+        i, soma: integer;
     begin
-        x := 'texto';       { Erro: String para Integer }
-        naoExiste := 10;    { Erro: Variável não declarada }
-        if x then x := 1;   { Erro: If sem booleano }
+        soma := 0;
+        writeln('Introduza 5 números:');
+        for i := 1 to 5 do
+        begin
+            readln(numeros[i]);
+            soma := soma + numeros[i];
+        end;
+        writeln('A soma é: ', soma);
     end.
     """
-    analisar_semantica(codigo_erro)
+    analisar_semantica(codigo2)
+
+    print("\n" + "=" * 70)
+    print("TESTE 3: Erros propositados")
+    print("=" * 70)
+    codigo3 = """
+    program Erros;
+    var
+        x: integer;
+        y: real;
+    begin
+        x := 'texto';
+        naoExiste := 10;
+        if x then x := 1;
+        y := x + 'string';
+    end.
+    """
+    analisar_semantica(codigo3)

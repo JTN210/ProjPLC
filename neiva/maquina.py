@@ -1,8 +1,6 @@
 import sys
 from sin import parse_string
-# ==============================================================================
-# GERADOR DE CÓDIGO (CORRIGIDO PARA EWVM)
-# ==============================================================================
+
 class GeradorCodigo:
     def __init__(self):
         self.codigo = []
@@ -97,7 +95,6 @@ class GeradorCodigo:
                 addr = self.obter_endereco(nome)
                 self.emitir('STOREG', addr)
 
-    # --- Controlo de Fluxo ---
     def visit_if(self, node):
         _, cond, stmt_then, stmt_else = node
         label_else = self.novo_label()
@@ -163,7 +160,7 @@ class GeradorCodigo:
         self.emitir('JUMP', label_inicio)
         self.emitir('LABEL', label_fim)
 
-    # --- Expressões ---
+    # Expressões
     def visit_binop(self, node):
         _, op, left, right = node
         self.visit(left)
@@ -217,10 +214,8 @@ if __name__ == "__main__":
     if ast:
         gerador = GeradorCodigo()
         gerador.visit(ast)
-        
         # 2. Imprimir APENAS o código Assembly
-        # (Sem "--- CÓDIGO ---" nem tracinhos)
-        print("\n\n") # Espaço para separar dos logs do parser
+        print("\n\n")
         for instr in gerador.codigo:
             if instr[0] == 'LABEL':
                 print(f"{instr[1]}:")

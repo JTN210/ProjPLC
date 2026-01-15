@@ -116,7 +116,6 @@ def t_ID(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
     # Verifica se é palavra reservada (case-insensitive)
     t.type = reserved.get(t.value.lower(), 'ID')
-    # Mantém o valor booleano para TRUE/FALSE
     if t.type == 'TRUE':
         t.value = True
     elif t.type == 'FALSE':
@@ -133,14 +132,13 @@ def t_COMMENT_BRACE(t):
 # Comentários estilo (* ... *)
 def t_COMMENT_PAREN(t):
     r'\(\*(.|\n)*?\*\)'
-    # Conta novas linhas dentro do comentário
     t.lexer.lineno += t.value.count('\n')
-    pass  # ignora comentários
+    pass
 
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
-# Assim mostra o número da linha onde ocorreu o erro
+
 def t_error(t):
     print(f"Caracter ilegal: {t.value[0]} na linha {t.lexer.lineno}")
     t.lexer.skip(1)

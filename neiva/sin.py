@@ -442,142 +442,142 @@ def print_ast(node, indent=0):
 
 # TESTES
 
-if __name__ == '__main__':
-    # Teste 1: Hello World
-    print("=" * 60)
-    print("TESTE 1: Hello World")
-    print("=" * 60)
-    test1 = """
-    program HelloWorld;
-    begin
-        writeln('Ola, Mundo!');
-    end.
-    """
-    result1 = parse_string(test1)
+# if __name__ == '__main__':
+#     # Teste 1: Hello World
+#     print("=" * 60)
+#     print("TESTE 1: Hello World")
+#     print("=" * 60)
+#     test1 = """
+#     program HelloWorld;
+#     begin
+#         writeln('Ola, Mundo!');
+#     end.
+#     """
+#     result1 = parse_string(test1)
     
-    # Teste 2: Fatorial
-    print("\n" + "=" * 60)
-    print("TESTE 2: Fatorial")
-    print("=" * 60)
-    test2 = """
-    program Fatorial;
-    var
-        n, i, fat: integer;
-    begin
-        writeln('Introduza um número inteiro positivo:');
-        readln(n);
-        fat := 1;
-        for i := 1 to n do
-            fat := fat * i;
-        writeln('Fatorial de ', n, ': ', fat);
-    end.
-    """
-    result2 = parse_string(test2)
+#     # Teste 2: Fatorial
+#     print("\n" + "=" * 60)
+#     print("TESTE 2: Fatorial")
+#     print("=" * 60)
+#     test2 = """
+#     program Fatorial;
+#     var
+#         n, i, fat: integer;
+#     begin
+#         writeln('Introduza um número inteiro positivo:');
+#         readln(n);
+#         fat := 1;
+#         for i := 1 to n do
+#             fat := fat * i;
+#         writeln('Fatorial de ', n, ': ', fat);
+#     end.
+#     """
+#     result2 = parse_string(test2)
     
-    # Teste 3: Número Primo
-    print("\n" + "=" * 60)
-    print("TESTE 3: Número Primo")
-    print("=" * 60)
-    test3 = """
-    program NumeroPrimo;
-    var
-        num, i: integer;
-        primo: boolean;
-    begin
-        writeln('Introduza um número inteiro positivo:');
-        readln(num);
-        primo := true;
-        i := 2;
-        while (i <= (num div 2)) and primo do
-        begin
-            if (num mod i) = 0 then
-                primo := false;
-            i := i + 1;
-        end;
-        if primo then
-            writeln(num, ' é um número primo')
-        else
-            writeln(num, ' não é um número primo')
-    end.
-    """
-    result3 = parse_string(test3)
+#     # Teste 3: Número Primo
+#     print("\n" + "=" * 60)
+#     print("TESTE 3: Número Primo")
+#     print("=" * 60)
+#     test3 = """
+#     program NumeroPrimo;
+#     var
+#         num, i: integer;
+#         primo: boolean;
+#     begin
+#         writeln('Introduza um número inteiro positivo:');
+#         readln(num);
+#         primo := true;
+#         i := 2;
+#         while (i <= (num div 2)) and primo do
+#         begin
+#             if (num mod i) = 0 then
+#                 primo := false;
+#             i := i + 1;
+#         end;
+#         if primo then
+#             writeln(num, ' é um número primo')
+#         else
+#             writeln(num, ' não é um número primo')
+#     end.
+#     """
+#     result3 = parse_string(test3)
     
-    # Teste 4: Array
-    print("\n" + "=" * 60)
-    print("TESTE 4: Soma de Array")
-    print("=" * 60)
-    test4 = """
-    program SomaArray;
-    var
-        numeros: array[1..5] of integer;
-        i, soma: integer;
-    begin
-        soma := 0;
-        writeln('Introduza 5 números inteiros:');
-        for i := 1 to 5 do
-        begin
-            readln(numeros[i]);
-            soma := soma + numeros[i];
-        end;
-        writeln('A soma dos números é: ', soma);
-    end.
-    """
-    result4 = parse_string(test4)
+#     # Teste 4: Array
+#     print("\n" + "=" * 60)
+#     print("TESTE 4: Soma de Array")
+#     print("=" * 60)
+#     test4 = """
+#     program SomaArray;
+#     var
+#         numeros: array[1..5] of integer;
+#         i, soma: integer;
+#     begin
+#         soma := 0;
+#         writeln('Introduza 5 números inteiros:');
+#         for i := 1 to 5 do
+#         begin
+#             readln(numeros[i]);
+#             soma := soma + numeros[i];
+#         end;
+#         writeln('A soma dos números é: ', soma);
+#     end.
+#     """
+#     result4 = parse_string(test4)
     
-    # Teste 5: Função
-    print("\n" + "=" * 60)
-    print("TESTE 5: Função BinToInt")
-    print("=" * 60)
-    test5 = """
-    program BinarioParaInteiro;
+#     # Teste 5: Função
+#     print("\n" + "=" * 60)
+#     print("TESTE 5: Função BinToInt")
+#     print("=" * 60)
+#     test5 = """
+#     program BinarioParaInteiro;
     
-    function BinToInt(bin: string): integer;
-    var
-        i, valor, potencia: integer;
-    begin
-        valor := 0;
-        potencia := 1;
-        for i := length(bin) downto 1 do
-        begin
-            if bin[i] = '1' then
-                valor := valor + potencia;
-            potencia := potencia * 2;
-        end;
-        BinToInt := valor;
-    end;
+#     function BinToInt(bin: string): integer;
+#     var
+#         i, valor, potencia: integer;
+#     begin
+#         valor := 0;
+#         potencia := 1;
+#         for i := length(bin) downto 1 do
+#         begin
+#             if bin[i] = '1' then
+#                 valor := valor + potencia;
+#             potencia := potencia * 2;
+#         end;
+#         BinToInt := valor;
+#     end;
     
-    var
-        bin: string;
-        valor: integer;
-    begin
-        writeln('Introduza uma string binária:');
-        readln(bin);
-        valor := BinToInt(bin);
-        writeln('O valor inteiro correspondente é: ', valor);
-    end.
-    """
-    result5 = parse_string(test5)
+#     var
+#         bin: string;
+#         valor: integer;
+#     begin
+#         writeln('Introduza uma string binária:');
+#         readln(bin);
+#         valor := BinToInt(bin);
+#         writeln('O valor inteiro correspondente é: ', valor);
+#     end.
+#     """
+#     result5 = parse_string(test5)
     
-    print("\n" + "=" * 60)
-    print("TESTE 6:")
-    print("=" * 60)
-    test6 = """
-    program Hello;
-    var
-    i : interger;
-    begin
-        i := (((-((((-((+++++++++++++++++(+((-+-+((2))))))))))))));
-        write(i)
-    end.
-    """
-    result6 = parse_string(test6)
+#     print("\n" + "=" * 60)
+#     print("TESTE 6:")
+#     print("=" * 60)
+#     test6 = """
+#     program Hello;
+#     var
+#     i : integer;
+#     begin
+#         i := (((-((((-((+++++++++++++++++(+((-+-+((2))))))))))))));
+#         write(i)
+#     end.
+#     """
+#     result6 = parse_string(test6)
     
-    print("\n" + "=" * 60)
-    print("RESUMO DOS TESTES")
-    print("=" * 60)
-    print(f"Teste 1 (Hello World): {'✓ PASSOU' if result1 else '✗ FALHOU'}")
-    print(f"Teste 2 (Fatorial): {'✓ PASSOU' if result2 else '✗ FALHOU'}")
-    print(f"Teste 3 (Número Primo): {'✓ PASSOU' if result3 else '✗ FALHOU'}")
-    print(f"Teste 4 (Array): {'✓ PASSOU' if result4 else '✗ FALHOU'}")
-    print(f"Teste 5 (Função): {'✓ PASSOU' if result5 else '✗ FALHOU'}")
-    print(f"Teste 6 (Função): {'✓ PASSOU' if result6 else '✗ FALHOU'}")
+#     print("\n" + "=" * 60)
+#     print("RESUMO DOS TESTES")
+#     print("=" * 60)
+#     print(f"Teste 1 (Hello World): {'✓ PASSOU' if result1 else '✗ FALHOU'}")
+#     print(f"Teste 2 (Fatorial): {'✓ PASSOU' if result2 else '✗ FALHOU'}")
+#     print(f"Teste 3 (Número Primo): {'✓ PASSOU' if result3 else '✗ FALHOU'}")
+#     print(f"Teste 4 (Array): {'✓ PASSOU' if result4 else '✗ FALHOU'}")
+#     print(f"Teste 5 (Função): {'✓ PASSOU' if result5 else '✗ FALHOU'}")
+#     print(f"Teste 6 (Função): {'✓ PASSOU' if result6 else '✗ FALHOU'}")

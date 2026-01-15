@@ -194,15 +194,14 @@ Valores:
 --------------------------------------- COMPATIBILIDADE COM LEX.PY ----------------------------------
 
 
-✓ Todos os tokens usados na gramática estão definidos no lex.py
-✓ RANGE (..) está corretamente definido como token no lexer
-✓ STRING está nas palavras reservadas
-✓ LENGTH está nas palavras reservadas
-✓ TRUE e FALSE retornam valores booleanos no lexer
-✓ Operadores relacionais todos definidos
-✓ Literais todos na lista de literals
+ Todos os tokens usados na gramática estão definidos no lex.py
+ RANGE (..) está corretamente definido como token no lexer
+ STRING está nas palavras reservadas
+ LENGTH está nas palavras reservadas
+ TRUE e FALSE retornam valores booleanos no lexer
+ Operadores relacionais todos definidos
+ Literais todos na lista de literals
 
-NENHUM ERRO DE COMPATIBILIDADE!
 
 
 
@@ -210,16 +209,16 @@ NENHUM ERRO DE COMPATIBILIDADE!
 
 
 MELHORIAS:
-+ Estrutura hierárquica mais clara (gramatica → programa → cabecalho)
-+ Suporte para PROCEDURES além de FUNCTIONS
-+ STRING como tipo básico (estava no lexer mas não na gramática original)
-+ READLN/WRITELN sem parênteses (exemplos do projeto usam isto)
-+ LENGTH como função built-in (exemplo 5 usa)
-+ Separação entre chamada_procedimento e chamada_funcao
-+ lista_expressao permite múltiplos argumentos em funções
-+ lista_variaveis para READ/READLN com múltiplas variáveis
-+ Sinais unários (+/-) em fatores
-+ Hierarquia de expressões explícita e correta
+ Estrutura hierárquica mais clara (gramatica → programa → cabecalho)
+ Suporte para PROCEDURES além de FUNCTIONS
+ STRING como tipo básico (estava no lexer mas não na gramática original)
+ READLN/WRITELN sem parênteses (exemplos do projeto usam isto)
+ LENGTH como função built-in (exemplo 5 usa)
+ Separação entre chamada_procedimento e chamada_funcao
+ lista_expressao permite múltiplos argumentos em funções
+ lista_variaveis para READ/READLN com múltiplas variáveis
+ Sinais unários (+/-) em fatores
+ Hierarquia de expressões explícita e correta
 
 MANTIDO DA GRAMÁTICA ORIGINAL:
 + Hierarquia de expressões bem estruturada
