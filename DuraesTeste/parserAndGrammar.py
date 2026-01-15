@@ -1,5 +1,5 @@
 import ply.yacc as yacc
-from lexer import tokens
+from Projetoatualizado.lexer import tokens
 
 precedence = (
     ('left', 'OR'),

@@ -1,5 +1,5 @@
 import sys
-from lexer import lexer
+from Projetoatualizado.lexer import lexer
 from parserAndGrammar import parser
 
 class CodeGenerator:
