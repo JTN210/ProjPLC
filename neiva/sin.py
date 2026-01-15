@@ -28,8 +28,32 @@ def p_programa(p):
 
 
 def p_cabecalho(p):
-    '''cabecalho : titulo declaracao_subprogramas declaracoes_variaveis'''
-    p[0] = ('cabecalho', p[1], p[2], p[3])
+    '''cabecalho : titulo declaracoes_variaveis declaracao_subprogramas declaracoes_variaveis_finais'''
+    # Combina vars iniciais e finais
+    vars_iniciais = p[2]
+    vars_finais = p[4]
+    # Junta as duas secções de variáveis
+    if vars_iniciais and vars_finais:
+        # Ambas existem - combinar declarações
+        decls_ini = vars_iniciais[1] if vars_iniciais else []
+        decls_fim = vars_finais[1] if vars_finais else []
+        vars_combinadas = ('var_section', decls_ini + decls_fim)
+    elif vars_iniciais:
+        vars_combinadas = vars_iniciais
+    elif vars_finais:
+        vars_combinadas = vars_finais
+    else:
+        vars_combinadas = None
+    p[0] = ('cabecalho', p[1], p[3], vars_combinadas)
+
+
+def p_declaracoes_variaveis_finais(p):
+    '''declaracoes_variaveis_finais : VAR declaracoes
+                                    | empty'''
+    if len(p) == 3:
+        p[0] = ('var_section', p[2])
+    else:
+        p[0] = None
 
 
 def p_titulo(p):
