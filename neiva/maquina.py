@@ -1,5 +1,6 @@
 import sys
 from sin import parse_file
+from semantica import AnalisadorSemantico
 
 class GeradorCodigo:
     def __init__(self):
@@ -715,6 +716,16 @@ if __name__ == "__main__":
     ast = parse_file(filename)
     
     if ast:
+        # Análise semântica
+        analisador = AnalisadorSemantico()
+        analisador.visit(ast)
+        
+        if analisador.erros:
+            for erro in analisador.erros:
+                print(erro)
+            sys.exit(1)
+        
+        # Geração de código EWVM se passar no semantica
         gerador = GeradorCodigo()
         gerador.visit(ast)
         

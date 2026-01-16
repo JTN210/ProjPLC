@@ -15,8 +15,8 @@ class TabelaSimbolos:
     def declarar_variavel(self, nome, tipo_info):
         """
         tipo_info é um dicionário:
-        - Para tipos simples: {'categoria': 'INTEGER', 'tipo_base': None}
-        - Para arrays: {'categoria': 'ARRAY', 'min_index': 1, 'max_index': 5, 'tipo_base': 'INTEGER'}
+        Para tipos simples: {'categoria': 'INTEGER', 'tipo_base': None}
+        Para arrays: {'categoria': 'ARRAY', 'min_index': 1, 'max_index': 5, 'tipo_base': 'INTEGER'}
         """
         escopo_atual = self.escopos[-1]
         if nome in escopo_atual:
@@ -218,7 +218,7 @@ class AnalisadorSemantico:
         if cat_var == 'REAL' and cat_expr == 'INTEGER':
             return
         
-        self.registar_erro(f"Atribuição incompatível: '{cat_expr}' → '{cat_var}'")
+        self.registar_erro(f"Atribuição incompatível: '{cat_expr}' -> '{cat_var}'")
 
     def visit_if(self, node):
         _, cond, stmt_then, stmt_else = node

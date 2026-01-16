@@ -2,7 +2,7 @@ program TesteBasico;
 var 
     a, b, res: integer;
 begin
-    writeln('--- Teste Basico ---');
+    writeln('Teste Basico');
     writeln('Introduza dois numeros:');
     readln(a);
     readln(b);

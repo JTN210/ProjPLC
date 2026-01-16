@@ -104,7 +104,7 @@ for_statement -> FOR ID ASSIGN expressao TO expressao DO instrucao
                | FOR ID ASSIGN expressao DOWNTO expressao DO instrucao
 
 
------------------------------- EXPRESSÕES (HIERARQUIA COMPLETA)----------------------------------------
+------------------------------ EXPRESSÕES ----------------------------------------
 lista_expressao -> expressao
                  | lista_expressao ',' expressao
 
@@ -135,7 +135,7 @@ termo -> termo '*' fator
        | fator
 
 
------------------------------------------- FATORES-------------------------------------------
+------------------------------------------ FATORES -------------------------------------------
 fator -> NUMBER
        | REAL_NUMBER
        | STRING_LITERAL
@@ -158,7 +158,7 @@ chamada_funcao -> ID '(' lista_expressao ')'
 
 
 
-------------------------- TOKENS NECESSÁRIOS DO LEXER (lex.py)-------------------------------
+------------------------- TOKENS NECESSÁRIOS DO LEXER (lex.py) -------------------------------
  
 
 Palavras Reservadas:
@@ -194,13 +194,13 @@ Valores:
 --------------------------------------- COMPATIBILIDADE COM LEX.PY ----------------------------------
 
 
- Todos os tokens usados na gramática estão definidos no lex.py
- RANGE (..) está corretamente definido como token no lexer
- STRING está nas palavras reservadas
- LENGTH está nas palavras reservadas
- TRUE e FALSE retornam valores booleanos no lexer
- Operadores relacionais todos definidos
- Literais todos na lista de literals
+Todos os tokens usados na gramática estão definidos no lex.py
+RANGE (..) está corretamente definido como token no lexer
+STRING está nas palavras reservadas
+LENGTH está nas palavras reservadas
+TRUE e FALSE retornam valores booleanos no lexer
+Operadores relacionais todos definidos
+Literais todos na lista de literals
 
 
 
@@ -209,21 +209,21 @@ Valores:
 
 
 MELHORIAS:
- Estrutura hierárquica mais clara (gramatica → programa → cabecalho)
- Suporte para PROCEDURES além de FUNCTIONS
- STRING como tipo básico (estava no lexer mas não na gramática original)
- READLN/WRITELN sem parênteses (exemplos do projeto usam isto)
- LENGTH como função built-in (exemplo 5 usa)
- Separação entre chamada_procedimento e chamada_funcao
- lista_expressao permite múltiplos argumentos em funções
- lista_variaveis para READ/READLN com múltiplas variáveis
- Sinais unários (+/-) em fatores
- Hierarquia de expressões explícita e correta
+Estrutura hierárquica mais clara (gramatica → programa → cabecalho)
+Suporte para PROCEDURES além de FUNCTIONS
+STRING como tipo básico (estava no lexer mas não na gramática original)
+READLN/WRITELN sem parênteses (exemplos do projeto usam isto)
+LENGTH como função built-in (exemplo 5 usa)
+Separação entre chamada_procedimento e chamada_funcao
+lista_expressao permite múltiplos argumentos em funções
+lista_variaveis para READ/READLN com múltiplas variáveis
+Sinais unários (+/-) em fatores
+Hierarquia de expressões explícita e correta
 
 MANTIDO DA GRAMÁTICA ORIGINAL:
-+ Hierarquia de expressões bem estruturada
-+ Separação clara de níveis (lógico → relacional → aritmético → termo → fator)
-+ Estrutura didática e organizada
+Hierarquia de expressões bem estruturada
+Separação clara de níveis (lógico → relacional → aritmético → termo → fator)
+Estrutura didática e organizada
 
 
 
@@ -234,13 +234,10 @@ MANTIDO DA GRAMÁTICA ORIGINAL:
 2. O símbolo ε (epsilon) representa a produção vazia
 
 3. A gramática cobre todos os 5 exemplos do projeto:
-   - Exemplo 1: Hello World ✓
-   - Exemplo 2: Fatorial (for, var) ✓
-   - Exemplo 3: Número Primo (while, if-else, boolean) ✓
-   - Exemplo 4: Arrays (array[..] of, acesso indexado) ✓
-   - Exemplo 5: Functions (function com parâmetros, length) ✓
+   - Exemplo 1: Hello World
+   - Exemplo 2: Fatorial (for, var)
+   - Exemplo 3: Número Primo (while, if-else, boolean)
+   - Exemplo 4: Arrays (array[..] of, acesso indexado)
+   - Exemplo 5: Functions (function com parâmetros, length)
 
 4. Não há conflitos ou ambiguidades conhecidas
-
-5. A precedência de operadores é tratada pela declaração
-   de precedência no parser, não pela gramática

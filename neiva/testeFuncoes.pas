@@ -5,7 +5,7 @@ var
 { Funcao auxiliar }
 procedure Saudacao;
 begin
-    writeln('--- Inicio do Calculo ---')
+    writeln('Inicio do Calculo')
 end;
 
 begin

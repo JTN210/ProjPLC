@@ -440,8 +440,8 @@ def parse_file(filename):
 def parse_string(code):
     return parser.parse(code, lexer=lexer)
 
-if __name__ == '__main__':
-    print("--- Teste do Parser ---")
-    code = "program Teste; begin writeln('Ola'); end."
-    result = parse_string(code)
-    print(result)
+# if __name__ == '__main__':
+#     print("Teste do Parser")
+#     code = "program Teste; begin writeln('Ola'); end."
+#     result = parse_string(code)
+#     print(result)
