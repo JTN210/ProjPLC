@@ -1,6 +1,6 @@
+import sys
 import re
 import ply.lex as lex
-import sys
 
 
 # PALAVRAS RESERVADAS
@@ -54,7 +54,7 @@ tokens = [
 ] + list(reserved.values())
 
 
-# LITERAIS
+# LITERALS
 
 literals = [';', ',', '(', ')', '.', ':', '[', ']', '+', '-', '*', '/']
 
@@ -145,11 +145,3 @@ def t_error(t):
     t.lexer.skip(1)
   
 lexer = lex.lex()
-
-# para testar com: python3 lex.py
-if __name__ == '__main__':
-    data = "var x: integer; begin x := 10; end."
-    lexer.input(data)
-    print("--- Teste do Lexer ---")
-    for tok in lexer:
-        print(tok)

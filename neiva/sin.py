@@ -1,7 +1,6 @@
 import ply.yacc as yacc
 from lex import tokens, lexer
-#--------------------------- FEITO PELO CLAUDE NÃO SEI SE ESTÁ BEM --------------------------------
-#------------------------------------ MAS PARECE ESTAR BEM ----------------------------------------
+
 # Precedência e associatividade dos operadores
 precedence = (
     ('left', 'OR'),
@@ -15,7 +14,7 @@ precedence = (
 )
 
 
-# 1. ESTRUTURA PRINCIPAL DO PROGRAMA
+# ESTRUTURA PRINCIPAL DO PROGRAMA
 
 def p_gramatica(p):
     '''gramatica : programa '.' '''
@@ -61,7 +60,7 @@ def p_titulo(p):
     p[0] = ('titulo', p[2])
 
 
-# 2. DECLARAÇÃO DE SUBPROGRAMAS (PROCEDURES E FUNCTIONS)
+# DECLARAÇÃO DE SUBPROGRAMAS (PROCEDURES E FUNCTIONS)
 
 def p_declaracao_subprogramas(p):
     '''declaracao_subprogramas : declaracao_subprogramas procedure_declaration
@@ -111,7 +110,7 @@ def p_lista_parametros(p):
         p[0] = [('param', p[1], p[3])] + p[5]
 
 
-# 3. DECLARAÇÕES DE VARIÁVEIS
+# DECLARAÇÕES DE VARIÁVEIS
 
 def p_declaracoes_variaveis(p):
     '''declaracoes_variaveis : VAR declaracoes
@@ -145,7 +144,7 @@ def p_lista_id(p):
         p[0] = p[1] + [p[3]]
 
 
-# 4. TIPOS
+# TIPOS
 
 def p_tipo(p):
     '''tipo : INTEGER
@@ -162,7 +161,7 @@ def p_tipo_array(p):
     p[0] = ('array', p[3], p[5], p[8])
 
 
-# 5. CORPO DO PROGRAMA
+# CORPO DO PROGRAMA
 
 def p_corpo(p):
     '''corpo : BEGIN lista_instrucoes END'''
@@ -178,7 +177,7 @@ def p_lista_instrucoes(p):
         p[0] = p[1] + ([p[3]] if p[3] is not None else [])
 
 
-# 6. INSTRUÇÕES
+# INSTRUÇÕES
 
 def p_instrucao(p):
     '''instrucao : atribuicao
@@ -212,7 +211,7 @@ def p_chamada_procedimento(p):
         p[0] = ('call', p[1], p[3])
 
 
-# 7. COMANDOS DE ENTRADA/SAÍDA
+# COMANDOS DE ENTRADA/SAÍDA
 
 def p_leitura(p):
     '''leitura : READ '(' lista_variaveis ')'
@@ -247,7 +246,7 @@ def p_lista_variaveis(p):
         p[0] = p[1] + [p[3]]
 
 
-# 8. ESTRUTURAS DE CONTROLE
+# ESTRUTURAS DE CONTROLE
 
 def p_if_statement(p):
     '''if_statement : IF expressao THEN instrucao
@@ -269,7 +268,7 @@ def p_for_statement(p):
     p[0] = ('for', p[2], p[4], p[6], p[5].lower(), p[8])
 
 
-# 9. EXPRESSÕES (HIERARQUIA COMPLETA)
+# EXPRESSÕES
 
 def p_lista_expressao(p):
     '''lista_expressao : expressao
@@ -366,7 +365,7 @@ def p_fator_mais_unario(p):
     p[0] = ('unop', '+', p[2])
 
 
-# 10. VARIÁVEIS E CHAMADAS DE FUNÇÃO
+# VARIÁVEIS E CHAMADAS DE FUNÇÃO
 
 def p_variavel(p):
     '''variavel : ID
@@ -386,25 +385,24 @@ def p_chamada_funcao(p):
         p[0] = ('call', p[1], p[3])
 
 
-# 11. REGRA VAZIA
+# Empty
 
 def p_empty(p):
     '''empty :'''
     pass
 
 
-# 12. TRATAMENTO DE ERROS
+# TRATAMENTO DE ERROS
 
 def p_error(p):
     if p:
         print(f"Erro de sintaxe no token '{p.value}' (tipo: {p.type}) na linha {p.lineno}")
-        # Tentar recuperar do erro
         parser.errok()
     else:
         print("Erro de sintaxe: fim de arquivo inesperado")
 
 
-# CONSTRUIR O PARSER
+# PARSER
 parser = yacc.yacc()
 
 # Auxiliar

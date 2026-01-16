@@ -158,7 +158,6 @@ class GeradorCodigo:
         
         self.funcoes[nome] = {'label': nome, 'num_params': 0, 'tipo': 'VOID'}
         self.emitir('LABEL', f"{nome}:")
-        
         # Guardar contexto anterior
         old_func = self.funcao_atual
         old_params = self.params_locais.copy()
@@ -192,9 +191,7 @@ class GeradorCodigo:
         self.funcao_atual = old_func
         self.params_locais = old_params 
 
-    # ==========================
     # ESTRUTURA E BLOCOS
-    # ==========================
 
     def visit_gramatica(self, node): 
         self.visit(node[1]) 
@@ -205,11 +202,11 @@ class GeradorCodigo:
         
         cabecalho = node[1]
         
-        # Primeiro: processar variáveis globais para saber quantas são
+        # processar variáveis globais para saber quantas são
         if len(cabecalho) > 3 and cabecalho[3]:
             self.processar_declaracoes(cabecalho[3])
         
-        # Segundo: gerar código dos subprogramas (que também declaram variáveis)
+        # gerar código dos subprogramas (que também declaram variáveis)
         if len(cabecalho) > 2 and cabecalho[2]:
             subprogs = cabecalho[2]
             if isinstance(subprogs, list):
@@ -217,7 +214,7 @@ class GeradorCodigo:
                     if subprog:
                         self.visit(subprog)
         
-        # Terceiro: gerar o main
+        # gerar o main
         self.emitir('LABEL', f"{label_main}:")
         self.emitir('START')
         
@@ -318,9 +315,7 @@ class GeradorCodigo:
         self.params_locais = old_params
         self.vars_locais = old_locais
 
-    # ==========================
     # CHAMADAS E ACESSOS
-    # ==========================
 
     def visit_call(self, node):
         nome = node[1]
@@ -398,9 +393,7 @@ class GeradorCodigo:
             self.emitir('LOADN')
             return tipo_base
 
-    # ==========================
     # INSTRUÇÕES
-    # ==========================
 
     def visit_begin_end(self, node): 
         self.visit(node[1])
@@ -424,17 +417,17 @@ class GeradorCodigo:
                 # STOREN: stores value in address[index]
                 # Stack order: address, index, value (bottom to top)
                 
-                # 1. Endereço base do array
+                # Endereço base do array
                 self.emitir('PUSHGP')
                 self.emitir('PUSHI', addr_base)
                 self.emitir('PADD')
                 
-                # 2. Índice
+                # Índice
                 self.visit(expr_index)
                 self.emitir('PUSHI', min_idx)
                 self.emitir('SUB')
                 
-                # 3. Valor
+                # Valor
                 self.visit(expr_node)
                 
                 self.emitir('STOREN')
@@ -712,7 +705,7 @@ class GeradorCodigo:
         return self.tabela_simbolos[nome].get('tipo', 'INTEGER')
 
 
-# --- MAIN ---
+# MAIN
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Uso: python3 maquina.py <ficheiro.pas>")
@@ -737,6 +730,6 @@ if __name__ == "__main__":
                         f.write(f"{clean_instr}\n")
                     else:
                         f.write(f"\t{instr}\n")
-            print(f"✅ Sucesso! {nome_saida}")
+            print(f"Sucesso! {nome_saida}")
         except Exception as e: 
             print(f"Erro ao escrever ficheiro: {e}")

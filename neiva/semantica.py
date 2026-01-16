@@ -79,7 +79,7 @@ class AnalisadorSemantico:
     def visit_generico(self, node):
         return None
 
-    # ===== ESTRUTURA DO PROGRAMA =====
+    # ESTRUTURA DO PROGRAMA
 
     def visit_gramatica(self, node):
         self.visit(node[1])
@@ -98,7 +98,7 @@ class AnalisadorSemantico:
         if subprogs:
             self.visit(subprogs)
 
-    # ===== DECLARAÇÕES DE VARIÁVEIS =====
+    # DECLARAÇÕES DE VARIÁVEIS
 
     def visit_var_section(self, node):
         self.visit(node[1])
@@ -126,7 +126,7 @@ class AnalisadorSemantico:
             if not sucesso:
                 self.registar_erro(f"Variável '{nome_var}' já declarada neste escopo.")
 
-    # ===== SUBPROGRAMAS =====
+    # SUBPROGRAMAS
 
     def visit_function(self, node):
         _, nome, params, tipo_ret, corpo = node
@@ -194,7 +194,7 @@ class AnalisadorSemantico:
             self.visit(decls)
         self.visit(corpo_instrucoes)
 
-    # ===== INSTRUÇÕES =====
+    # INSTRUÇÕES
 
     def visit_begin_end(self, node):
         self.visit(node[1])
@@ -214,7 +214,7 @@ class AnalisadorSemantico:
         if cat_var == cat_expr:
             return
         
-        # Coerção INTEGER → REAL
+        #  INTEGER  REAL
         if cat_var == 'REAL' and cat_expr == 'INTEGER':
             return
         
@@ -257,7 +257,7 @@ class AnalisadorSemantico:
             
         self.visit(corpo)
 
-    # ===== EXPRESSÕES =====
+    # EXPRESSÕES
 
     def visit_binop(self, node):
         _, op, esq, dir_node = node
@@ -343,7 +343,7 @@ class AnalisadorSemantico:
         
         return t
 
-    # ===== VARIÁVEIS E ACESSO =====
+    # VARIÁVEIS E ACESSO
 
     def visit_var(self, node):
         nome = node[1]
@@ -365,7 +365,7 @@ class AnalisadorSemantico:
         if t_index and t_index['categoria'] != 'INTEGER':
             self.registar_erro("Índice de array/string deve ser INTEGER.")
 
-        # Strings podem ser indexadas → retorna CHAR
+        # Strings podem ser indexadas retorna CHAR
         if info['categoria'] == 'STRING':
             return {'categoria': 'CHAR'}
         
@@ -434,21 +434,3 @@ class AnalisadorSemantico:
             
     def visit_write(self, node):
         self.visit_writeln(node)
-
-
-# para testar com: python3 semantica.py
-def analisar_semantica(ast):
-    if not ast: return False
-    analisador = AnalisadorSemantico()
-    analisador.visit(ast)
-    if analisador.erros:
-        for erro in analisador.erros:
-            print(erro)
-        return False
-    return True
-
-if __name__ == '__main__':
-    print("--- Teste da Semântica ---")
-    code = "program Teste; var x: integer; begin x := 10; end."
-    ast = parse_string(code)
-    analisar_semantica(ast)

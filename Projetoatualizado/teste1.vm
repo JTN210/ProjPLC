@@ -1,6 +1,0 @@
-START
-PUSHS "Ola, Mundo!"
-WRITES
-PUSHS "\n"
-WRITES
-STOP
